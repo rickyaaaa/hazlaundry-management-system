@@ -35,11 +35,14 @@
 .status-dot { width: 6px; height: 6px; border-radius: 50%; }
 
 /* Custom status colors */
+.bg-menunggujemputan { background: #fee2e2; color: #b91c1c; } .bg-menunggujemputan .status-dot { background: #b91c1c; }
+.bg-prosespenjemputan { background: #ffedd5; color: #c2410c; } .bg-prosespenjemputan .status-dot { background: #c2410c; }
 .bg-diproses { background: #eff6ff; color: #2563eb; } .bg-diproses .status-dot { background: #2563eb; }
 .bg-dicuci { background: #faf5ff; color: #9333ea; } .bg-dicuci .status-dot { background: #9333ea; }
 .bg-dikeringkan { background: #fffbeb; color: #d97706; } .bg-dikeringkan .status-dot { background: #d97706; }
 .bg-disetrika { background: #fefce8; color: #ca8a04; } .bg-disetrika .status-dot { background: #ca8a04; }
 .bg-selesai { background: #ecfdf5; color: #059669; } .bg-selesai .status-dot { background: #059669; }
+.bg-prosespengantaran { background: #cffafe; color: #0369a1; } .bg-prosespengantaran .status-dot { background: #0369a1; }
 .bg-diambil { background: #f8fafc; color: #475569; } .bg-diambil .status-dot { background: #475569; }
 
 .badge-pay { padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; display: inline-block; }
@@ -162,7 +165,16 @@
         <tbody>
             @forelse($transactions as $t)
             <tr>
-                <td><span class="tx-id">#{{ $t->tracking_code }}</span></td>
+                <td>
+                    <div style="display:flex; flex-direction:column; gap:4px; align-items:flex-start;">
+                        <span class="tx-id">#{{ $t->tracking_code }}</span>
+                        @if($t->delivery_type == 'pickup_delivery')
+                            <span style="padding:2px 6px; background:#fef08a; color:#854d0e; font-size:9px; border-radius:4px; font-weight:800;">PICKUP</span>
+                        @else
+                            <span style="padding:2px 6px; background:#e2e8f0; color:#475569; font-size:9px; border-radius:4px; font-weight:800;">WALK-IN</span>
+                        @endif
+                    </div>
+                </td>
                 <td>
                     <div class="tx-customer">
                         @php 

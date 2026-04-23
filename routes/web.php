@@ -21,6 +21,8 @@ Route::get('/', fn () => redirect()->route('tracking.index'));
 // ── Public: Customer Tracking (NO LOGIN REQUIRED) ────────────────────────
 Route::get('/tracking',         [TrackingController::class, 'index'])->name('tracking.index');
 Route::post('/tracking',        [TrackingController::class, 'track'])->name('tracking.track');
+Route::get('/pickup',           [TrackingController::class, 'showPickupForm'])->name('tracking.pickup.form');
+Route::post('/pickup',          [TrackingController::class, 'storePickup'])->name('tracking.pickup.store');
 
 // ── Public: Pricing & Support ────────────────────────────────────────────────
 Route::get('/pricing', function () {

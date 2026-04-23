@@ -28,6 +28,7 @@
     <a href="{{ route('tracking.index') }}" style="font-size: 18px; font-weight: 800; color: #003366; letter-spacing: 0.5px; text-decoration: none;">LUXELAUNDRY</a>
     <div style="display: flex; gap: 32px; align-items: center;">
         <a href="{{ route('tracking.index') }}" class="nav-link" style="color: #003366; font-weight: 600;">Tracking</a>
+        <a href="{{ route('tracking.pickup.form') }}" class="nav-link">Antar Jemput</a>
         <a href="{{ route('pricing.index') }}" class="nav-link">Pricing</a>
         <a href="{{ route('support.index') }}" class="nav-link">Support</a>
     </div>
@@ -41,6 +42,12 @@
     @if($errors->any())
     <div style="max-width:600px;margin:0 auto 16px;background:#fef2f2;border:1px solid #fca5a5;border-radius:12px;padding:12px 20px;text-align:left;font-size:14px;color:#991b1b">
         {{ $errors->first() }}
+    </div>
+    @endif
+
+    @if(session('success'))
+    <div style="max-width:600px;margin:0 auto 16px;background:#f0fdf4;border:1px solid #86efac;border-radius:12px;padding:12px 20px;text-align:left;font-size:14px;color:#166534">
+        {{ session('success') }}
     </div>
     @endif
 

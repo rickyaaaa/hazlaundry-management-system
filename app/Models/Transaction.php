@@ -20,6 +20,9 @@ class Transaction extends Model
         'payment_status',
         'notes',
         'estimated_completion',
+        'delivery_type',
+        'address',
+        'pickup_time',
     ];
 
     protected $casts = [
@@ -27,6 +30,7 @@ class Transaction extends Model
         'price_per_kg' => 'decimal:2',
         'total_price' => 'decimal:2',
         'estimated_completion' => 'datetime',
+        'pickup_time' => 'datetime',
     ];
 
     // Payment statuses
@@ -37,11 +41,14 @@ class Transaction extends Model
 
     // All possible statuses in order
     public const STATUSES = [
+        'Menunggu Jemputan',
+        'Proses Penjemputan',
         'Diproses',
         'Dicuci',
         'Dikeringkan',
         'Disetrika',
         'Selesai',
+        'Proses Pengantaran',
         'Diambil',
     ];
 

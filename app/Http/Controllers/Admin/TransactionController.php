@@ -15,7 +15,7 @@ class TransactionController extends Controller
         $query = Transaction::with('service')->latest();
 
         // Search
-        if ($search = $request->get('search')) {
+        if ($search = $request->input('search')) {
             $query->where(function ($q) use ($search) {
                 $q->where('customer_name', 'like', "%{$search}%")
                   ->orWhere('tracking_code', 'like', "%{$search}%")
@@ -24,12 +24,12 @@ class TransactionController extends Controller
         }
 
         // Filter by status
-        if ($status = $request->get('status')) {
+        if ($status = $request->input('status')) {
             $query->where('status', $status);
         }
 
         // Filter by payment_status
-        if ($paymentStatus = $request->get('payment_status')) {
+        if ($paymentStatus = $request->input('payment_status')) {
             $query->where('payment_status', $paymentStatus);
         }
 

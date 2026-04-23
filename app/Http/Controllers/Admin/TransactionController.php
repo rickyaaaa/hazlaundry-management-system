@@ -153,9 +153,21 @@ class TransactionController extends Controller
             'changed_at'     => now(),
         ]);
 
+        // Auto transition to 'Proses Pengantaran' if delivery type is pickup_delivery
+        if ($validated['status'] === 'Selesai' && $transaction->delivery_type === 'pickup_delivery') {
+            $transaction->update(['status' => 'Proses Pengantaran']);
+            
+            TransactionStatus::create([
+                'transaction_id' => $transaction->id,
+                'status'         => 'Proses Pengantaran',
+                'notes'          => 'Otomatis beralih ke pengantaran',
+                'changed_at'     => now(),
+            ]);
+        }
+
         return redirect()
             ->route('admin.transactions.show', $transaction)
-            ->with('success', "Status diperbarui menjadi {$validated['status']}");
+            ->with('success', "Status diperbarui menjadi {$transaction->status}");
     }
 
     public function destroy(Transaction $transaction)

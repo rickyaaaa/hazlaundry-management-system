@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Tracking {{ $transaction->tracking_code }} – LuxeLaundry</title>
+<title>Tracking {{ $transaction->tracking_code }} – HAZ Laundry</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{{ asset('css/app.css') }}">
@@ -86,13 +86,13 @@
 <body class="tracking-body" style="background:#f8fafc;">
 
 <nav style="background: white; padding: 20px 40px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #f1f5f9;">
-    <a href="{{ route('tracking.index') }}" style="font-size: 18px; font-weight: 800; color: #003366; letter-spacing: 0.5px; text-decoration: none;">LUXELAUNDRY</a>
+    <a href="{{ route('tracking.index') }}" style="font-size: 18px; font-weight: 800; color: #003366; letter-spacing: 0.5px; text-decoration: none;">HAZ Laundry</a>
     <div style="display: flex; gap: 32px; align-items: center;">
         <a href="{{ route('tracking.index') }}" class="nav-link" style="color: #003366; font-weight: 600;">Tracking</a>
         <a href="{{ route('pricing.index') }}" class="nav-link">Pricing</a>
         <a href="{{ route('support.index') }}" class="nav-link">Support</a>
     </div>
-    <a href="{{ route('login') }}" class="header-btn">Admin Login</a>
+    @auth <a href="{{ route('admin.dashboard') }}" class="header-btn">Dashboard</a> @else <a href="{{ route('login') }}" class="header-btn">Admin Login</a> @endauth
 </nav>
 
 <main style="flex: 1; padding: 0 24px 60px;">
@@ -120,7 +120,7 @@
                     'Dikeringkan'=> 'Your laundry is currently being dried carefully.',
                     'Disetrika'  => 'Your laundry is currently being ironed and will be ready soon! Our team is ensuring the highest precision for your garments.',
                     'Selesai'    => 'Your laundry is ready for pickup at our facility.',
-                    'Diambil'    => 'Order has been picked up. Thank you for choosing LuxeLaundry!',
+                    'Diambil'    => 'Order has been picked up. Thank you for choosing HAZ Laundry!',
                 ];
                 $activeIdx = array_search($transaction->status, $statuses);
                 if($activeIdx === false) $activeIdx = 0;
@@ -273,7 +273,7 @@
 </main>
 
 <footer style="padding: 32px 40px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: #64748b; border-top: 1px solid #f1f5f9;">
-    <span>© {{ date('Y') }} LuxeLaundry. Precision Laundry Logistics.</span>
+    <span>© {{ date('Y') }} HAZ Laundry. Precision Laundry Logistics.</span>
     <div style="display: flex; gap: 24px;">
         <a href="#" class="nav-link" style="font-size: 13px;">Privacy Policy</a>
         <a href="#" class="nav-link" style="font-size: 13px;">Terms of Service</a>
@@ -283,3 +283,4 @@
 
 </body>
 </html>
+

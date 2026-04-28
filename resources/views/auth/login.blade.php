@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Login – LuxeLaundry</title>
+<title>Login – HAZ Laundry</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{{ asset('css/app.css') }}">
@@ -19,7 +19,7 @@ body{background:#eef2f7;min-height:100vh;display:flex;flex-direction:column;alig
             <path d="M21 10V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l2-1.14"/>
         </svg>
     </div>
-    <div class="auth-logo-name">LuxeLaundry</div>
+    <div class="auth-logo-name">HAZ Laundry</div>
     <div class="auth-logo-sub">Enterprise Laundry Management</div>
 </div>
 
@@ -37,10 +37,10 @@ body{background:#eef2f7;min-height:100vh;display:flex;flex-direction:column;alig
     <form method="POST" action="{{ route('login.post') }}">
         @csrf
         <div class="form-group">
-            <label class="form-label">Email Address</label>
+            <label class="form-label">Username</label>
             <div class="input-icon-wrap">
-                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                <input type="email" name="email" class="form-control" placeholder="name@company.com" value="{{ old('email') }}" required autofocus>
+                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <input type="text" name="username" class="form-control" placeholder="Masukkan username" value="{{ old('username') }}" required autofocus>
             </div>
         </div>
         <div class="form-group">
@@ -81,6 +81,6 @@ body{background:#eef2f7;min-height:100vh;display:flex;flex-direction:column;alig
     <span>Support Center</span>
 </div>
 
-<div class="version-badge">V 1.0.0-Stable · LuxeLaundry</div>
+<div class="version-badge">V 1.0.0-Stable · HAZ Laundry</div>
 </body>
 </html>

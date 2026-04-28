@@ -48,7 +48,7 @@
             <span class="stat-badge stat-badge-up">+8.4% ↑</span>
         </div>
         <div class="stat-label">Total Revenue</div>
-        <div class="stat-value" style="font-size:22px">Rp {{ number_format($totalRevenue,0,',','.') }}</div>
+        <div class="stat-value" style="font-size:24px">Rp {{ number_format($totalRevenue,0,',','.') }}</div>
     </div>
 </div>
 

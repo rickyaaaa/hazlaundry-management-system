@@ -32,6 +32,10 @@
                     <div><div class="form-label">Total Harga</div><div style="font-weight:700;font-size:18px;color:var(--primary)">Rp {{ number_format($transaction->total_price,0,',','.') }}</div></div>
                     <div><div class="form-label">Status Bayar</div><span class="badge badge-{{ $transaction->payment_status }}">{{ $transaction->payment_status=='lunas'?'Lunas':'Belum Bayar' }}</span></div>
                     <div><div class="form-label">Tanggal Masuk</div><div>{{ $transaction->created_at->format('d M Y, H:i') }}</div></div>
+                    <div><div class="form-label">Tipe Pengiriman</div><div style="font-weight:600">{{ $transaction->delivery_type == 'pickup_delivery' ? 'Antar Jemput' : 'Drop Off' }}</div></div>
+                    @if($transaction->delivery_type == 'pickup_delivery')
+                    <div style="grid-column: span 2;"><div class="form-label">Alamat</div><div style="font-weight:600">{{ $transaction->address }}</div></div>
+                    @endif
                 </div>
                 @if($transaction->notes)
                 <div style="margin-top:16px;padding:12px;background:var(--bg);border-radius:8px;font-size:13px">

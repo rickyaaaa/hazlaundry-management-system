@@ -13,9 +13,9 @@ class ReportController extends Controller
 {
     public function index(Request $request)
     {
-        $type  = $request->get('type', 'monthly');   // daily | monthly
-        $year  = $request->get('year', now()->year);
-        $month = $request->get('month', now()->month);
+        $type  = $request->input('type', 'monthly');   // daily | monthly
+        $year  = $request->input('year', now()->year);
+        $month = $request->input('month', now()->month);
 
         // Monthly revenue (12 months of selected year)
         $monthlyRevenue = Transaction::select(
@@ -89,8 +89,8 @@ class ReportController extends Controller
 
     public function exportPdf(Request $request)
     {
-        $year  = $request->get('year', now()->year);
-        $month = $request->get('month', now()->month);
+        $year  = $request->input('year', now()->year);
+        $month = $request->input('month', now()->month);
 
         $monthlyRevenue = Transaction::select(
                 DB::raw('MONTH(created_at) as month'),

@@ -24,7 +24,7 @@
     <div class="stat-card">
         <div class="stat-header"><div class="stat-icon stat-icon-purple"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div><span class="stat-badge stat-badge-up">+12.5%</span></div>
         <div class="stat-label">Total Revenue</div>
-        <div class="stat-value" style="font-size:20px">Rp {{ number_format($totalRevenue,0,',','.') }}</div>
+        <div class="stat-value" style="font-size:24px">Rp {{ number_format($totalRevenue,0,',','.') }}</div>
     </div>
     <div class="stat-card">
         <div class="stat-header"><div class="stat-icon stat-icon-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg></div><span class="stat-badge stat-badge-up">+8.2%</span></div>

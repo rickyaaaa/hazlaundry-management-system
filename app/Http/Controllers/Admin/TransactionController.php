@@ -59,6 +59,8 @@ class TransactionController extends Controller
             'weight'         => 'required|numeric|min:0.1',
             'notes'          => 'nullable|string|max:500',
             'payment_status' => 'required|in:lunas,belum_bayar',
+            'delivery_type'  => 'required|in:drop_off,pickup_delivery',
+            'address'        => 'nullable|required_if:delivery_type,pickup_delivery|string|max:1000',
         ]);
 
         $service      = LaundryService::findOrFail($validated['service_id']);
@@ -68,8 +70,10 @@ class TransactionController extends Controller
 
         $transaction = Transaction::create([
             'tracking_code'       => $trackingCode,
+            'delivery_type'       => $validated['delivery_type'],
             'customer_name'       => $validated['customer_name'],
             'phone_number'        => $validated['phone_number'],
+            'address'             => $validated['address'] ?? null,
             'service_id'          => $validated['service_id'],
             'weight'              => $validated['weight'],
             'price_per_kg'        => $pricePerKg,
@@ -116,6 +120,8 @@ class TransactionController extends Controller
             'weight'         => 'required|numeric|min:0.1',
             'notes'          => 'nullable|string|max:500',
             'payment_status' => 'required|in:lunas,belum_bayar',
+            'delivery_type'  => 'required|in:drop_off,pickup_delivery',
+            'address'        => 'nullable|required_if:delivery_type,pickup_delivery|string|max:1000',
         ]);
 
         $service    = LaundryService::findOrFail($validated['service_id']);
@@ -124,6 +130,8 @@ class TransactionController extends Controller
         $transaction->update([
             'customer_name'  => $validated['customer_name'],
             'phone_number'   => $validated['phone_number'],
+            'delivery_type'  => $validated['delivery_type'],
+            'address'        => $validated['address'] ?? null,
             'service_id'     => $validated['service_id'],
             'weight'         => $validated['weight'],
             'price_per_kg'   => $service->price_per_kg,

@@ -24,7 +24,7 @@ td:last-child{font-weight:600;color:#111;text-align:right}
 </head>
 <body>
 <div class="header">
-    <div class="company">LuxeLaundry</div>
+    <div class="company">HAZ Laundry</div>
     <div class="subtitle">Enterprise Laundry Management</div>
     <br>
     <div class="code">{{ $transaction->tracking_code }}</div>
@@ -58,7 +58,7 @@ td:last-child{font-weight:600;color:#111;text-align:right}
 <div class="footer">
     Terima kasih telah mempercayakan laundry Anda kepada kami.<br>
     Simpan struk ini sebagai bukti pengambilan.<br>
-    LuxeLaundry &copy; {{ date('Y') }}
+    HAZ Laundry &copy; {{ date('Y') }}
 </div>
 </body>
 </html>

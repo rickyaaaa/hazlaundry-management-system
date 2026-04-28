@@ -24,7 +24,7 @@
   --shadow-lg: 0 10px 40px rgba(0,0,0,.12);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Inter',system-ui,sans-serif;font-size:14px;color:var(--text);background:var(--bg);line-height:1.5}
+body{font-family:'Plus Jakarta Sans',system-ui,-apple-system,sans-serif;font-size:14px;color:var(--text);background:var(--bg);line-height:1.6;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
 a{text-decoration:none;color:inherit}
 button{cursor:pointer;border:none;background:none;font-family:inherit}
 input,select,textarea{font-family:inherit}
@@ -102,7 +102,7 @@ img{max-width:100%}
 /* ── CARDS ── */
 .card{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow)}
 .card-header{display:flex;align-items:center;justify-content:space-between;padding:20px 24px 0}
-.card-title{font-size:16px;font-weight:700;color:var(--text)}
+.card-title{font-size:18px;font-weight:700;color:var(--text);letter-spacing:-.3px}
 .card-body{padding:20px 24px}
 
 /* Stat cards */
@@ -125,12 +125,12 @@ img{max-width:100%}
 .stat-badge-down{background:#fef2f2;color:#991b1b}
 .stat-badge-neutral{background:var(--bg);color:var(--text-2)}
 .stat-label{font-size:11px;font-weight:600;color:var(--text-3);letter-spacing:.8px;text-transform:uppercase;margin-bottom:6px}
-.stat-value{font-size:28px;font-weight:800;color:var(--text);letter-spacing:-1px}
+.stat-value{font-size:30px;font-weight:700;color:var(--text);letter-spacing:-1px}
 
 /* ── TABLE ── */
 .table-wrapper{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface);box-shadow:var(--shadow)}
 table{width:100%;border-collapse:collapse}
-thead th{padding:11px 16px;text-align:left;font-size:11px;font-weight:700;color:var(--text-3);letter-spacing:.8px;text-transform:uppercase;background:var(--surface-2);border-bottom:1px solid var(--border);white-space:nowrap}
+thead th{padding:12px 16px;text-align:left;font-size:11px;font-weight:700;color:var(--text-3);letter-spacing:.8px;text-transform:uppercase;background:var(--surface-2);border-bottom:1px solid var(--border);white-space:nowrap}
 tbody td{padding:14px 16px;border-bottom:1px solid var(--border);font-size:13px;color:var(--text);vertical-align:middle}
 tbody tr:last-child td{border-bottom:none}
 tbody tr:hover{background:var(--surface-2)}
@@ -144,7 +144,7 @@ tbody tr:hover{background:var(--surface-2)}
 .avatar-purple{background:#8b5cf6}
 .avatar-red{background:#ef4444}
 .avatar-pink{background:#ec4899}
-.customer-name{font-weight:600;color:var(--text)}
+.customer-name{font-weight:700;color:var(--text)}
 
 /* Status badges */
 .badge{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:50px;font-size:11px;font-weight:600;letter-spacing:.3px}
@@ -173,8 +173,8 @@ textarea.form-control{resize:vertical;min-height:80px}
 
 /* ── PAGE HEADER ── */
 .page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;gap:16px}
-.page-title{font-size:26px;font-weight:800;color:var(--text);letter-spacing:-.5px}
-.page-subtitle{font-size:13px;color:var(--text-2);margin-top:3px}
+.page-title{font-size:28px;font-weight:700;color:var(--text);letter-spacing:-.5px}
+.page-subtitle{font-size:14px;color:var(--text-2);margin-top:4px}
 .page-actions{display:flex;align-items:center;gap:10px;flex-shrink:0}
 
 /* ── BREADCRUMB ── */
@@ -251,7 +251,7 @@ textarea.form-control{resize:vertical;min-height:80px}
 .order-summary-total span{font-size:13px;font-weight:400;opacity:.7}
 
 /* ── RECEIPT PDF ── */
-.receipt-body{font-family:'Inter',sans-serif;padding:32px;max-width:480px;margin:0 auto;color:#111}
+.receipt-body{font-family:'Plus Jakarta Sans','Inter',sans-serif;padding:32px;max-width:480px;margin:0 auto;color:#111}
 .receipt-header{text-align:center;margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid #003366}
 .receipt-company{font-size:22px;font-weight:800;color:#003366}
 .receipt-subtitle{font-size:12px;color:#64748b}

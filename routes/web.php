@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\TransactionController;
 use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\ReportController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\TrackingController;
 use App\Http\Controllers\ReceiptController;
 
@@ -61,6 +62,9 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
 
     // Services / Settings
     Route::resource('services', ServiceController::class)->except(['show']);
+
+    // Users
+    Route::resource('users', UserController::class);
 
     // Reports
     Route::get('/reports',            [ReportController::class, 'index'])->name('reports.index');

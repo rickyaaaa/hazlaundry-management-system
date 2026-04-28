@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Pricing – LuxeLaundry</title>
+<title>Pricing – HAZ Laundry</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{{ asset('css/app.css') }}">
@@ -32,13 +32,14 @@
 <body class="tracking-body">
 
 <nav style="background: white; padding: 20px 40px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #f1f5f9;">
-    <a href="{{ route('tracking.index') }}" style="font-size: 18px; font-weight: 800; color: #003366; letter-spacing: 0.5px; text-decoration: none;">LUXELAUNDRY</a>
+    <a href="{{ route('tracking.index') }}" style="font-size: 18px; font-weight: 800; color: #003366; letter-spacing: 0.5px; text-decoration: none;">HAZ Laundry</a>
     <div style="display: flex; gap: 32px; align-items: center;">
         <a href="{{ route('tracking.index') }}" class="nav-link">Tracking</a>
+        <a href="{{ route('tracking.pickup.form') }}" class="nav-link">Antar Jemput</a>
         <a href="{{ route('pricing.index') }}" class="nav-link" style="color: #003366; font-weight: 600;">Pricing</a>
         <a href="{{ route('support.index') }}" class="nav-link">Support</a>
     </div>
-    <a href="{{ route('login') }}" class="header-btn">Admin Login</a>
+    @auth <a href="{{ route('admin.dashboard') }}" class="header-btn">Dashboard</a> @else <a href="{{ route('login') }}" class="header-btn">Admin Login</a> @endauth
 </nav>
 
 <main style="flex: 1; padding-bottom: 60px;">
@@ -61,7 +62,7 @@
 </main>
 
 <footer style="padding: 32px 40px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: #64748b; border-top: 1px solid #f1f5f9; background: white;">
-    <span>© {{ date('Y') }} LuxeLaundry. Precision Laundry Logistics.</span>
+    <span>© {{ date('Y') }} HAZ Laundry. Precision Laundry Logistics.</span>
     <div style="display: flex; gap: 24px;">
         <a href="#" class="nav-link" style="font-size: 13px;">Privacy Policy</a>
         <a href="#" class="nav-link" style="font-size: 13px;">Terms of Service</a>
@@ -71,3 +72,4 @@
 
 </body>
 </html>
+

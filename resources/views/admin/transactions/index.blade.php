@@ -10,12 +10,12 @@
 .tx-stat-icon svg { width: 24px; height: 24px; }
 .tx-stat-info { display: flex; flex-direction: column; }
 .tx-stat-label { font-size: 11px; font-weight: 700; color: #94a3b8; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 2px; }
-.tx-stat-value { font-size: 24px; font-weight: 700; color: #0f172a; }
+.tx-stat-value { font-size: 28px; font-weight: 700; color: #0f172a; letter-spacing: -0.5px; }
 
 /* Table Section */
 .tx-table-card { background: white; border-radius: 12px; padding: 24px; border: 1px solid #f1f5f9; box-shadow: 0 2px 10px rgba(0,0,0,0.02); margin-bottom: 32px; }
 .tx-table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-.tx-table-title { font-size: 18px; font-weight: 700; color: #0f172a; }
+.tx-table-title { font-size: 20px; font-weight: 700; color: #0f172a; letter-spacing: -0.3px; }
 .tx-table-actions { display: flex; gap: 12px; }
 .btn-outline-gray { display: flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 13px; font-weight: 600; color: #475569; background: white; transition: all 0.2s; cursor: pointer; }
 .btn-outline-gray:hover { background: #f8fafc; border-color: #cbd5e1; color: #0f172a; }

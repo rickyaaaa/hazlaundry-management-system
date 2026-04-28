@@ -16,7 +16,7 @@ tr:nth-child(even) td{background:#f8fafc}
 </style>
 </head>
 <body>
-<h1>LuxeLaundry – Laporan Tahunan</h1>
+<h1>HAZ Laundry – Laporan Tahunan</h1>
 <div class="sub">Tahun: {{ $year }} · Dicetak: {{ now()->format('d M Y H:i') }}</div>
 
 <table>
@@ -47,6 +47,6 @@ tr:nth-child(even) td{background:#f8fafc}
     </tbody>
 </table>
 
-<div class="footer">LuxeLaundry Enterprise Laundry Management · Laporan dibuat otomatis oleh sistem</div>
+<div class="footer">HAZ Laundry Enterprise Laundry Management · Laporan dibuat otomatis oleh sistem</div>
 </body>
 </html>

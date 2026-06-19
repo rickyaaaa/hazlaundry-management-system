@@ -26,7 +26,20 @@
                 @endforeach
             </select>
         </div>
-        <div class="form-group"><label class="form-label">Weight (KG)</label><input type="number" name="weight" id="weightInput" class="form-control" value="{{ old('weight',$transaction->weight) }}" min="0.1" step="0.1" required></div>
+        <div class="form-group"><label class="form-label">Weight (KG)</label><input type="number" name="weight" id="weightInput" class="form-control" value="{{ old('weight',$transaction->weight) }}" min="0" step="0.1" required></div>
+    </div>
+    <div class="grid-2">
+        <div class="form-group">
+            <label class="form-label">Delivery Type</label>
+            <select name="delivery_type" class="form-control" id="deliveryTypeSelect" required>
+                <option value="drop_off" {{ old('delivery_type', $transaction->delivery_type) == 'drop_off' ? 'selected' : '' }}>Drop Off</option>
+                <option value="pickup_delivery" {{ old('delivery_type', $transaction->delivery_type) == 'pickup_delivery' ? 'selected' : '' }}>Pickup & Delivery</option>
+            </select>
+        </div>
+        <div class="form-group" id="addressGroup" style="display: none;">
+            <label class="form-label">Pickup/Delivery Address</label>
+            <textarea name="address" id="addressInput" class="form-control" rows="2" placeholder="Enter full address for pickup/delivery...">{{ old('address', $transaction->address) }}</textarea>
+        </div>
     </div>
     <div class="form-group">
         <label class="form-label">Payment Status</label>
@@ -59,5 +72,22 @@ function calc(){
 document.getElementById('serviceSelect').addEventListener('change',calc);
 document.getElementById('weightInput').addEventListener('input',calc);
 calc();
+
+// Handle delivery type & address toggle
+const deliverySelect = document.getElementById('deliveryTypeSelect');
+const addressGroup = document.getElementById('addressGroup');
+const addressInput = document.getElementById('addressInput');
+
+function toggleAddress() {
+    if (deliverySelect.value === 'pickup_delivery') {
+        addressGroup.style.display = 'block';
+        addressInput.required = true;
+    } else {
+        addressGroup.style.display = 'none';
+        addressInput.required = false;
+    }
+}
+deliverySelect.addEventListener('change', toggleAddress);
+toggleAddress();
 </script>
 @endpush

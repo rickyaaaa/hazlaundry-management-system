@@ -78,6 +78,35 @@ class TrackingController extends Controller
             'changed_at' => now(),
         ]);
 
+        // Kirim Notifikasi Telegram ke Admin
+        $botToken = config('services.telegram.bot_token');
+        $chatId   = config('services.telegram.chat_id');
+
+        if ($botToken && $chatId) {
+            $transaction->load('service');
+            $serviceName = $transaction->service ? $transaction->service->name : 'N/A';
+            $pickupTime  = $transaction->pickup_time ? $transaction->pickup_time->format('d-m-Y H:i') : '-';
+
+            $message = "🔔 *Permintaan Antar-Jemput Baru*\n\n"
+                     . "📄 *Kode Tracking:* `{$transaction->tracking_code}`\n"
+                     . "👤 *Pelanggan:* {$transaction->customer_name}\n"
+                     . "📞 *No. HP:* {$transaction->phone_number}\n"
+                     . "📍 *Alamat:* {$transaction->address}\n"
+                     . "⏰ *Waktu Jemput:* {$pickupTime}\n"
+                     . "🧺 *Layanan:* {$serviceName}\n"
+                     . "🔄 *Status:* {$transaction->status}";
+
+            try {
+                \Illuminate\Support\Facades\Http::post("https://api.telegram.org/bot{$botToken}/sendMessage", [
+                    'chat_id'    => $chatId,
+                    'text'       => $message,
+                    'parse_mode' => 'Markdown',
+                ]);
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error("Gagal mengirim notifikasi Telegram: " . $e->getMessage());
+            }
+        }
+
         return redirect()->route('tracking.index')
                          ->with('success', "Permintaan antar jemput berhasil dibuat. Kode Tracking Anda: {$trackingCode}. Tim kami akan segera menghubungi Anda.");
     }

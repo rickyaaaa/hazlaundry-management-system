@@ -14,6 +14,7 @@ class DashboardController extends Controller
         $inProcess       = Transaction::inProcess()->count();
         $completed       = Transaction::completed()->count();
         $totalRevenue    = Transaction::where('payment_status', 'lunas')->sum('total_price');
+        $pendingPickups  = Transaction::where('status', 'Menunggu Jemputan')->count();
 
         // Recent transactions
         $recentTransactions = Transaction::with('service')
@@ -47,7 +48,8 @@ class DashboardController extends Controller
             'totalRevenue',
             'recentTransactions',
             'monthlyRevenue',
-            'statusCounts'
+            'statusCounts',
+            'pendingPickups'
         ));
     }
 }

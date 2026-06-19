@@ -32,14 +32,14 @@
 .stepper-container { position: relative; display: flex; justify-content: space-between; margin-top: 48px; margin-bottom: 16px; }
 .stepper-line-bg { position: absolute; top: 18px; left: 5%; right: 5%; height: 3px; background: #e2e8f0; z-index: 1; }
 .stepper-line-progress { position: absolute; top: 18px; left: 5%; height: 3px; background: #10b981; z-index: 2; transition: width 0.3s ease; }
-.step-node { position: relative; z-index: 3; display: flex; flex-direction: column; align-items: center; gap: 12px; width: 80px; }
+.step-node { position: relative; z-index: 3; display: flex; flex-direction: column; align-items: center; gap: 12px; width: auto; flex: 1; min-width: 50px; }
 .step-circle { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: #f1f5f9; color: #94a3b8; border: 3px solid white; }
 .step-circle svg { width: 18px; height: 18px; }
 
 .step-node.done .step-circle { background: #10b981; color: white; }
 .step-node.active .step-circle { background: #003366; color: white; box-shadow: 0 0 0 4px #e2e8f0; border-color: transparent; }
 
-.step-label { font-size: 11px; font-weight: 600; color: #94a3b8; text-align: center; }
+.step-label { font-size: 10px; font-weight: 600; color: #94a3b8; text-align: center; line-height: 1.2; }
 .step-node.done .step-label { color: #10b981; }
 .step-node.active .step-label { color: #003366; }
 
@@ -114,16 +114,46 @@
         <div style="display: flex; flex-direction: column; gap: 24px;">
             
             @php
+                // Filter visible statuses based on delivery type
+                if ($transaction->delivery_type === 'pickup_delivery') {
+                    $visibleStatuses = [
+                        'Menunggu Jemputan',
+                        'Proses Penjemputan',
+                        'Diproses',
+                        'Dicuci',
+                        'Dikeringkan',
+                        'Disetrika',
+                        'Selesai',
+                        'Proses Pengantaran',
+                        'Diambil',
+                    ];
+                } else {
+                    $visibleStatuses = [
+                        'Diproses',
+                        'Dicuci',
+                        'Dikeringkan',
+                        'Disetrika',
+                        'Selesai',
+                        'Diambil',
+                    ];
+                }
+
                 $msgs = [
-                    'Diproses'   => 'Your laundry is currently being processed by our team.',
-                    'Dicuci'     => 'Your laundry is currently being washed using our premium detergents.',
-                    'Dikeringkan'=> 'Your laundry is currently being dried carefully.',
-                    'Disetrika'  => 'Your laundry is currently being ironed and will be ready soon! Our team is ensuring the highest precision for your garments.',
-                    'Selesai'    => 'Your laundry is ready for pickup at our facility.',
-                    'Diambil'    => 'Order has been picked up. Thank you for choosing HAZ Laundry!',
+                    'Menunggu Jemputan' => 'We have received your pickup request. Our driver will pick it up soon.',
+                    'Proses Penjemputan'=> 'Our driver is on their way to pick up your laundry.',
+                    'Diproses'          => 'Your laundry is currently being processed by our team.',
+                    'Dicuci'            => 'Your laundry is currently being washed using our premium detergents.',
+                    'Dikeringkan'       => 'Your laundry is currently being dried carefully.',
+                    'Disetrika'         => 'Your laundry is currently being ironed and will be ready soon! Our team is ensuring the highest precision for your garments.',
+                    'Selesai'           => 'Your laundry is ready at our facility.',
+                    'Proses Pengantaran'=> 'Our driver is delivering your laundry back to your address.',
+                    'Diambil'           => 'Order has been completed and received. Thank you for choosing HAZ Laundry!',
                 ];
-                $activeIdx = array_search($transaction->status, $statuses);
-                if($activeIdx === false) $activeIdx = 0;
+
+                $activeIdx = array_search($transaction->status, $visibleStatuses);
+                if ($activeIdx === false) {
+                    $activeIdx = 0;
+                }
             @endphp
 
             <!-- Alert Card -->
@@ -143,36 +173,44 @@
                 
                 <div class="stepper-container">
                     <div class="stepper-line-bg"></div>
-                    <div class="stepper-line-progress" style="width: {{ ($activeIdx / (count($statuses)-1)) * 90 }}%;"></div>
+                    <div class="stepper-line-progress" style="width: {{ ($activeIdx / (count($visibleStatuses)-1)) * 90 }}%;"></div>
                     
-                    @foreach($statuses as $i => $s)
+                    @foreach($visibleStatuses as $i => $s)
                     @php 
                         $done = $i < $activeIdx; 
                         $active = $i === $activeIdx;
                         
                         // Map statuses to english
                         $enLabel = [
-                            'Diproses' => 'Order Received',
-                            'Dicuci' => 'Washing',
-                            'Dikeringkan' => 'Drying',
-                            'Disetrika' => 'Ironing',
-                            'Selesai' => 'Ready for Pickup',
-                            'Diambil' => 'Completed'
+                            'Menunggu Jemputan'  => 'Waiting Pickup',
+                            'Proses Penjemputan' => 'Picking Up',
+                            'Diproses'           => 'Received',
+                            'Dicuci'             => 'Washing',
+                            'Dikeringkan'        => 'Drying',
+                            'Disetrika'          => 'Ironing',
+                            'Selesai'            => 'Ready',
+                            'Proses Pengantaran' => 'Delivering',
+                            'Diambil'            => 'Completed'
                         ][$s] ?? $s;
+
+                        $icons = [
+                            'Menunggu Jemputan'  => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+                            'Proses Penjemputan' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>',
+                            'Diproses'           => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>',
+                            'Dicuci'             => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>',
+                            'Dikeringkan'        => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2v20"/><path d="M2 12h20"/><path d="m19 19-14-14"/><path d="m19 5-14 14"/></svg>',
+                            'Disetrika'          => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 14h14.5a2.5 2.5 0 0 0 0-5H10"/><path d="M4 14v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/><path d="M4 14c-1.3 0-2-1-2-2v-2c0-1.7 1.3-3 3-3h12c2.2 0 4 1.8 4 4v3"/></svg>',
+                            'Selesai'            => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 4 12 14.01 9 11.01"/><path d="M22 11v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>',
+                            'Proses Pengantaran' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/><line x1="6" y1="13" x2="10" y2="13"/><line x1="3" y1="9" x2="11" y2="9"/></svg>',
+                            'Diambil'            => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>'
+                        ];
                     @endphp
                     <div class="step-node {{ $done ? 'done' : '' }} {{ $active ? 'active' : '' }}">
                         <div class="step-circle">
                             @if($done)
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                            @elseif($active)
-                                <!-- Replace with iron icon for ironing, but we'll use a generic icon based on status or a dot -->
-                                @if($s == 'Disetrika')
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 14h14.5a2.5 2.5 0 0 0 0-5H10"/><path d="M4 14v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/><path d="M4 14c-1.3 0-2-1-2-2v-2c0-1.7 1.3-3 3-3h12c2.2 0 4 1.8 4 4v3"/></svg>
-                                @else
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/></svg>
-                                @endif
                             @else
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                {!! $icons[$s] ?? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/></svg>' !!}
                             @endif
                         </div>
                         <div class="step-label">{!! str_replace(' ', '<br>', $enLabel) !!}</div>

@@ -16,7 +16,7 @@ class AdminSeeder extends Seeder
                 'name'     => 'Super Admin',
                 'username' => 'superadmin',
                 'email'    => 'admin@luxelaundry.com',
-                'password' => Hash::make('password'),
+                'password' => Hash::make('admin123'),
                 'role'     => 'admin',
             ]
         );

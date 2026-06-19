@@ -8,8 +8,51 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{{ asset('css/app.css') }}">
 <style>
-body{background:#eef2f7;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px}
-.version-badge{position:fixed;bottom:16px;left:16px;background:rgba(0,0,0,.06);padding:8px 14px;border-radius:8px;font-size:11px;color:#64748b}
+body {
+    background-image: url('{{ asset('images/promo-bg.png') }}');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    position: relative;
+    z-index: 1;
+}
+body::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(2px);
+    z-index: -1;
+}
+.auth-logo-name {
+    color: #ffffff !important;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+.auth-logo-sub {
+    color: #e2e8f0 !important;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+.auth-links, .auth-links span {
+    color: #e2e8f0 !important;
+}
+.version-badge {
+    position: fixed;
+    bottom: 16px;
+    left: 16px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(4px);
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 11px;
+    color: #f1f5f9;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
 </style>
 </head>
 <body>

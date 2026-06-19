@@ -9,7 +9,7 @@
 </div>
 
 <!-- Stats -->
-<div class="stats-grid">
+<div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr))">
     <div class="stat-card">
         <div class="stat-header">
             <div class="stat-icon stat-icon-blue">
@@ -19,6 +19,16 @@
         </div>
         <div class="stat-label">Total Orders</div>
         <div class="stat-value">{{ number_format($totalOrders) }}</div>
+    </div>
+    <div class="stat-card" style="border-left: 4px solid #f97316;">
+        <div class="stat-header">
+            <div class="stat-icon" style="background:#fff7ed;display:flex;align-items:center;justify-content:center;border-radius:10px;width:40px;height:40px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2" style="width:20px;height:20px;"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
+            </div>
+            <span class="stat-badge" style="background:#ffedd5;color:#c2410c">Pickup</span>
+        </div>
+        <div class="stat-label">Menunggu Jemputan</div>
+        <div class="stat-value" style="color: #c2410c;">{{ number_format($pendingPickups) }}</div>
     </div>
     <div class="stat-card">
         <div class="stat-header">

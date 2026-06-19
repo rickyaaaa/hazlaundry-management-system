@@ -117,7 +117,7 @@ class TransactionController extends Controller
             'customer_name'  => 'required|string|max:255',
             'phone_number'   => 'required|string|max:20',
             'service_id'     => 'required|exists:laundry_services,id',
-            'weight'         => 'required|numeric|min:0.1',
+            'weight'         => 'required|numeric|min:0',
             'notes'          => 'nullable|string|max:500',
             'payment_status' => 'required|in:lunas,belum_bayar',
             'delivery_type'  => 'required|in:drop_off,pickup_delivery',
@@ -161,6 +161,11 @@ class TransactionController extends Controller
             'changed_at'     => now(),
         ]);
 
+        // Kirim notifikasi jika status diubah ke Proses Pengantaran atau Selesai
+        if (in_array($validated['status'], ['Proses Pengantaran', 'Selesai'])) {
+            $this->sendTelegramNotification($transaction, $validated['status'], $validated['notes']);
+        }
+
         // Auto transition to 'Proses Pengantaran' if delivery type is pickup_delivery
         if ($validated['status'] === 'Selesai' && $transaction->delivery_type === 'pickup_delivery') {
             $transaction->update(['status' => 'Proses Pengantaran']);
@@ -171,11 +176,41 @@ class TransactionController extends Controller
                 'notes'          => 'Otomatis beralih ke pengantaran',
                 'changed_at'     => now(),
             ]);
+
+            // Kirim notifikasi untuk auto transition
+            $this->sendTelegramNotification($transaction, 'Proses Pengantaran', 'Otomatis beralih ke pengantaran');
         }
 
         return redirect()
             ->route('admin.transactions.show', $transaction)
             ->with('success', "Status diperbarui menjadi {$transaction->status}");
+    }
+
+    /**
+     * Kirim notifikasi status transaksi ke Telegram admin/internal team
+     */
+    private function sendTelegramNotification(Transaction $transaction, string $status, ?string $notes = null): void
+    {
+        $botToken = config('services.telegram.bot_token');
+        $chatId   = config('services.telegram.chat_id');
+
+        if ($botToken && $chatId) {
+            $message = "📢 *Pembaruan Status Transaksi*\n\n"
+                     . "📄 *Kode Tracking:* `{$transaction->tracking_code}`\n"
+                     . "👤 *Pelanggan:* {$transaction->customer_name}\n"
+                     . "🔄 *Status Baru:* *{$status}*\n"
+                     . "📝 *Catatan:* " . ($notes ?: '-') . "\n";
+
+            try {
+                \Illuminate\Support\Facades\Http::post("https://api.telegram.org/bot{$botToken}/sendMessage", [
+                    'chat_id'    => $chatId,
+                    'text'       => $message,
+                    'parse_mode' => 'Markdown',
+                ]);
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error("Gagal mengirim notifikasi status Telegram: " . $e->getMessage());
+            }
+        }
     }
 
     public function destroy(Transaction $transaction)

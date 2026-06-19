@@ -53,6 +53,10 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+    // Password Reset
+    Route::get('/password/reset', [UserController::class, 'showPasswordResetForm'])->name('password.reset');
+    Route::post('/password/reset', [UserController::class, 'updatePassword'])->name('password.update');
+
     // Transactions
     Route::resource('transactions', TransactionController::class);
     Route::post('/transactions/{transaction}/status', [TransactionController::class, 'updateStatus'])

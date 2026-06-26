@@ -55,7 +55,7 @@
             <div class="p-name">{{ $s->name }}</div>
             <div class="p-desc">{{ $s->description ?? 'Layanan premium untuk kebersihan dan kerapian pakaian Anda.' }}</div>
             <div class="p-price">Rp {{ number_format($s->price_per_kg, 0, ',', '.') }}<span> /pcs</span></div>
-            <a href="{{ route('tracking.index') }}" class="p-btn {{ $i == 1 ? '' : '' }}" style="{{ $i == 1 ? 'background: #003366; color: white;' : '' }}">Track Order</a>
+            <a href="{{ route('tracking.pickup.form') }}" class="p-btn {{ $i == 1 ? '' : '' }}" style="{{ $i == 1 ? 'background: #003366; color: white;' : '' }}">Pesan Antar Jemput</a>
         </div>
         @endforeach
     </div>

@@ -8,6 +8,96 @@
     </div>
 </div>
 
+@if($activePromos->count() > 0)
+<!-- Promo Banner Widget (CRM - Customer Retention) -->
+<div class="card" style="margin-bottom: 20px; overflow: hidden; border: none; box-shadow: var(--shadow-sm); position: relative; height: 130px; border-radius: 12px; background: #003366;">
+    <div class="admin-promo-carousel" style="width: 100%; height: 100%; position: relative;">
+        @foreach($activePromos as $idx => $p)
+            <div class="admin-promo-slide" data-slide-admin="{{ $idx }}" style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: space-between; transition: opacity 0.5s ease-in-out; {{ $idx === 0 ? 'opacity: 1; z-index: 5;' : 'opacity: 0; z-index: 1;' }}">
+                <!-- Background image -->
+                <div style="position: absolute; inset: 0; width: 100%; height: 100%; background: url('{{ $p->image_url }}') center/cover no-repeat; opacity: 0.25; filter: blur(2px);"></div>
+                <div style="position: absolute; inset: 0; background: linear-gradient(90deg, #002244 30%, rgba(0,34,68,0.8) 70%, rgba(0,34,68,0.2) 100%);"></div>
+                
+                <!-- Content -->
+                <div style="position: relative; z-index: 10; padding: 20px 24px; color: white; max-width: 70%; display: flex; flex-direction: column; gap: 4px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 9px; font-weight: 800; background: #f97316; color: white; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Promo CRM</span>
+                        <span style="font-size: 11px; color: rgba(255,255,255,0.7);">Customer Retention Program</span>
+                    </div>
+                    <h3 style="font-size: 16px; font-weight: 700; margin: 4px 0 2px; line-height: 1.2; font-family: 'Plus Jakarta Sans', sans-serif;">{{ $p->title }}</h3>
+                    <p style="font-size: 11px; color: rgba(255,255,255,0.85); margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">{{ $p->description }}</p>
+                </div>
+                
+                <!-- Graphic decoration on the right -->
+                <div style="position: relative; z-index: 10; padding-right: 32px; display: flex; align-items: center; justify-content: flex-end; width: 30%; height: 100%;">
+                    <div style="width: 80px; height: 80px; border-radius: 8px; overflow: hidden; border: 2px solid rgba(255,255,255,0.2); box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+                        <img src="{{ $p->image_url }}" alt="{{ $p->title }}" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                </div>
+            </div>
+        @endforeach
+        
+        <!-- Dot Navigation for dashboard carousel if > 1 -->
+        @if($activePromos->count() > 1)
+            <div style="position: absolute; bottom: 10px; left: 24px; z-index: 15; display: flex; gap: 4px;">
+                @foreach($activePromos as $idx => $p)
+                    <span class="admin-promo-dot" data-goto-admin="{{ $idx }}" style="width: 6px; height: 6px; border-radius: 50%; cursor: pointer; transition: all 0.3s; {{ $idx === 0 ? 'background: #f97316; width: 15px;' : 'background: rgba(255,255,255,0.4);' }}"></span>
+                @endforeach
+            </div>
+        @endif
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const slides = document.querySelectorAll('.admin-promo-slide');
+        const dots = document.querySelectorAll('.admin-promo-dot');
+        if (slides.length <= 1) return;
+
+        let current = 0;
+        const total = slides.length;
+        const interval = 6000; // 6 seconds
+
+        function show(index) {
+            slides.forEach((slide, i) => {
+                if (i === index) {
+                    slide.style.opacity = '1';
+                    slide.style.zIndex = '5';
+                } else {
+                    slide.style.opacity = '0';
+                    slide.style.zIndex = '1';
+                }
+            });
+            dots.forEach((dot, i) => {
+                if (i === index) {
+                    dot.style.background = '#f97316';
+                    dot.style.width = '15px';
+                } else {
+                    dot.style.background = 'rgba(255,255,255,0.4)';
+                    dot.style.width = '6px';
+                }
+            });
+            current = index;
+        }
+
+        function next() {
+            show((current + 1) % total);
+        }
+
+        let slideTimer = setInterval(next, interval);
+
+        dots.forEach(dot => {
+            dot.addEventListener('click', function () {
+                clearInterval(slideTimer);
+                const target = parseInt(this.getAttribute('data-goto-admin'));
+                show(target);
+                slideTimer = setInterval(next, interval);
+            });
+        });
+    });
+</script>
+@endif
+
 <!-- Stats -->
 <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr))">
     <div class="stat-card">

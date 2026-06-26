@@ -65,12 +65,27 @@
             </div>
 
             <div class="form-group">
+                <label class="form-label" for="email">Alamat Email</label>
+                <input type="email" id="email" name="email" class="form-input" placeholder="contoh@email.com" value="{{ old('email') }}" required>
+                <span style="font-size: 11px; color: #64748b; display: block; margin-top: 4px;">
+                    Email ini akan digunakan untuk mengirimkan notifikasi pembaruan status laundry Anda.
+                </span>
+            </div>
+            
+            <div class="form-group" style="display: flex; align-items: flex-start; gap: 10px; margin-top: 12px; margin-bottom: 24px;">
+                <input type="checkbox" id="wants_promo" name="wants_promo" value="1" {{ old('wants_promo', '1') ? 'checked' : '' }} style="margin-top: 3px; cursor: pointer; width: 16px; height: 16px;">
+                <label for="wants_promo" style="font-weight: 500; font-size: 13px; color: #475569; cursor: pointer; line-height: 1.4;">
+                    Ceklis untuk menerima info promo menarik dari HAZ Laundry
+                </label>
+            </div>
+
+            <div class="form-group">
                 <label class="form-label" for="service_id">Pilih Layanan</label>
                 <select id="service_id" name="service_id" class="form-input" required>
                     <option value="">-- Pilih Layanan --</option>
                     @foreach($services as $service)
                         <option value="{{ $service->id }}" {{ old('service_id') == $service->id ? 'selected' : '' }}>
-                            {{ $service->name }} (Rp {{ number_format($service->price_per_kg, 0, ',', '.') }}/kg)
+                            {{ $service->name }} (Rp {{ number_format($service->price_per_kg, 0, ',', '.') }}/pcs)
                         </option>
                     @endforeach
                 </select>

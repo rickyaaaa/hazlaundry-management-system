@@ -156,7 +156,7 @@
                 <th>ORDER ID</th>
                 <th>CUSTOMER NAME</th>
                 <th>SERVICE TYPE</th>
-                <th>WEIGHT (KG)</th>
+                <th>JUMLAH (PCS)</th>
                 <th>STATUS</th>
                 <th>PAYMENT STATUS</th>
                 <th>ACTIONS</th>
@@ -188,7 +188,7 @@
                 <td>
                     <span class="badge-service">{{ str_replace(' ', "\n", $t->service->name ?? '-') }}</span>
                 </td>
-                <td style="font-weight: 600; color: #0f172a;">{{ number_format($t->weight, 1) }}</td>
+                <td style="font-weight: 600; color: #0f172a;">{{ (int)$t->weight }} pcs</td>
                 <td>
                     @php $sl = strtolower(str_replace(' ', '', $t->status)); @endphp
                     <span class="badge-status bg-{{ $sl }}">

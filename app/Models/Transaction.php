@@ -23,6 +23,7 @@ class Transaction extends Model
         'delivery_type',
         'address',
         'pickup_time',
+        'email',
     ];
 
     protected $casts = [

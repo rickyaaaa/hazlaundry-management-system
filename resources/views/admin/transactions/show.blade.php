@@ -27,8 +27,8 @@
                     <div><div class="form-label">Nama</div><div style="font-weight:600">{{ $transaction->customer_name }}</div></div>
                     <div><div class="form-label">Nomor HP</div><div style="font-weight:600">{{ $transaction->phone_number }}</div></div>
                     <div><div class="form-label">Layanan</div><div style="font-weight:600">{{ $transaction->service->name ?? '-' }}</div></div>
-                    <div><div class="form-label">Berat</div><div style="font-weight:600">{{ $transaction->weight }} kg</div></div>
-                    <div><div class="form-label">Harga/kg</div><div style="font-weight:600">Rp {{ number_format($transaction->price_per_kg,0,',','.') }}</div></div>
+                    <div><div class="form-label">Jumlah</div><div style="font-weight:600">{{ (int)$transaction->weight }} pcs</div></div>
+                    <div><div class="form-label">Harga Satuan</div><div style="font-weight:600">Rp {{ number_format($transaction->price_per_kg,0,',','.') }}</div></div>
                     <div><div class="form-label">Total Harga</div><div style="font-weight:700;font-size:18px;color:var(--primary)">Rp {{ number_format($transaction->total_price,0,',','.') }}</div></div>
                     <div><div class="form-label">Status Bayar</div><span class="badge badge-{{ $transaction->payment_status }}">{{ $transaction->payment_status=='lunas'?'Lunas':'Belum Bayar' }}</span></div>
                     <div><div class="form-label">Tanggal Masuk</div><div>{{ $transaction->created_at->format('d M Y, H:i') }}</div></div>
@@ -117,8 +117,8 @@
             <div class="summary-label">Order Summary</div>
             <div class="summary-title" style="font-size:14px;word-break:break-all">{{ $transaction->tracking_code }}</div>
             <div class="order-summary-row"><span>Layanan</span><span>{{ $transaction->service->name ?? '-' }}</span></div>
-            <div class="order-summary-row"><span>Berat</span><span>{{ $transaction->weight }} kg</span></div>
-            <div class="order-summary-row"><span>Rate</span><span>Rp {{ number_format($transaction->price_per_kg,0,',','.') }}/kg</span></div>
+            <div class="order-summary-row"><span>Jumlah</span><span>{{ (int)$transaction->weight }} pcs</span></div>
+            <div class="order-summary-row"><span>Harga Satuan</span><span>Rp {{ number_format($transaction->price_per_kg,0,',','.') }}/pcs</span></div>
             <div style="padding-top:12px;border-top:1px solid rgba(255,255,255,.2);margin-top:4px">
                 <div style="font-size:11px;opacity:.7;margin-bottom:4px">Total Amount</div>
                 <div class="order-summary-total">Rp {{ number_format($transaction->total_price,0,',','.') }}</div>

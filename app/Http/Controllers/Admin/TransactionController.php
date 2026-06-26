@@ -6,7 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\Transaction;
 use App\Models\TransactionStatus;
 use App\Models\LaundryService;
+use App\Mail\StatusLaundryMail;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class TransactionController extends Controller
 {
@@ -56,32 +59,34 @@ class TransactionController extends Controller
             'customer_name'  => 'required|string|max:255',
             'phone_number'   => 'required|string|max:20',
             'service_id'     => 'required|exists:laundry_services,id',
-            'weight'         => 'required|numeric|min:0.1',
+            'weight'         => 'required|integer|min:1',
+            'price_per_kg'   => 'required|numeric|min:0',
             'notes'          => 'nullable|string|max:500',
             'payment_status' => 'required|in:lunas,belum_bayar',
             'delivery_type'  => 'required|in:drop_off,pickup_delivery',
             'address'        => 'nullable|required_if:delivery_type,pickup_delivery|string|max:1000',
+            'email'          => 'required|email|max:255',
         ]);
 
-        $service      = LaundryService::findOrFail($validated['service_id']);
-        $pricePerKg   = $service->price_per_kg;
+        $pricePerKg   = $validated['price_per_kg'];
         $totalPrice   = $pricePerKg * $validated['weight'];
         $trackingCode = Transaction::generateTrackingCode();
 
         $transaction = Transaction::create([
-            'tracking_code'       => $trackingCode,
-            'delivery_type'       => $validated['delivery_type'],
-            'customer_name'       => $validated['customer_name'],
-            'phone_number'        => $validated['phone_number'],
-            'address'             => $validated['address'] ?? null,
-            'service_id'          => $validated['service_id'],
-            'weight'              => $validated['weight'],
-            'price_per_kg'        => $pricePerKg,
-            'total_price'         => $totalPrice,
-            'status'              => 'Diproses',
-            'payment_status'      => $validated['payment_status'],
-            'notes'               => $validated['notes'] ?? null,
+            'tracking_code'        => $trackingCode,
+            'delivery_type'        => $validated['delivery_type'],
+            'customer_name'        => $validated['customer_name'],
+            'phone_number'         => $validated['phone_number'],
+            'address'              => $validated['address'] ?? null,
+            'service_id'           => $validated['service_id'],
+            'weight'               => $validated['weight'],
+            'price_per_kg'         => $pricePerKg,
+            'total_price'          => $totalPrice,
+            'status'               => 'Diproses',
+            'payment_status'       => $validated['payment_status'],
+            'notes'                => $validated['notes'] ?? null,
             'estimated_completion' => now()->addDays(2),
+            'email'                => $validated['email'],
         ]);
 
         // Log initial status
@@ -117,15 +122,17 @@ class TransactionController extends Controller
             'customer_name'  => 'required|string|max:255',
             'phone_number'   => 'required|string|max:20',
             'service_id'     => 'required|exists:laundry_services,id',
-            'weight'         => 'required|numeric|min:0',
+            'weight'         => 'required|integer|min:1',
+            'price_per_kg'   => 'required|numeric|min:0',
             'notes'          => 'nullable|string|max:500',
             'payment_status' => 'required|in:lunas,belum_bayar',
             'delivery_type'  => 'required|in:drop_off,pickup_delivery',
             'address'        => 'nullable|required_if:delivery_type,pickup_delivery|string|max:1000',
+            'email'          => 'required|email|max:255',
         ]);
 
-        $service    = LaundryService::findOrFail($validated['service_id']);
-        $totalPrice = $service->price_per_kg * $validated['weight'];
+        $pricePerKg = $validated['price_per_kg'];
+        $totalPrice = $pricePerKg * $validated['weight'];
 
         $transaction->update([
             'customer_name'  => $validated['customer_name'],
@@ -134,10 +141,11 @@ class TransactionController extends Controller
             'address'        => $validated['address'] ?? null,
             'service_id'     => $validated['service_id'],
             'weight'         => $validated['weight'],
-            'price_per_kg'   => $service->price_per_kg,
+            'price_per_kg'   => $pricePerKg,
             'total_price'    => $totalPrice,
             'payment_status' => $validated['payment_status'],
             'notes'          => $validated['notes'] ?? null,
+            'email'          => $validated['email'],
         ]);
 
         return redirect()
@@ -161,9 +169,9 @@ class TransactionController extends Controller
             'changed_at'     => now(),
         ]);
 
-        // Kirim notifikasi jika status diubah ke Proses Pengantaran atau Selesai
+        // Kirim email jika status diubah ke Proses Pengantaran atau Selesai
         if (in_array($validated['status'], ['Proses Pengantaran', 'Selesai'])) {
-            $this->sendTelegramNotification($transaction, $validated['status'], $validated['notes']);
+            $this->sendMailNotification($transaction);
         }
 
         // Auto transition to 'Proses Pengantaran' if delivery type is pickup_delivery
@@ -177,8 +185,8 @@ class TransactionController extends Controller
                 'changed_at'     => now(),
             ]);
 
-            // Kirim notifikasi untuk auto transition
-            $this->sendTelegramNotification($transaction, 'Proses Pengantaran', 'Otomatis beralih ke pengantaran');
+            // Kirim email untuk auto transition
+            $this->sendMailNotification($transaction);
         }
 
         return redirect()
@@ -187,28 +195,15 @@ class TransactionController extends Controller
     }
 
     /**
-     * Kirim notifikasi status transaksi ke Telegram admin/internal team
+     * Kirim email pembaruan status transaksi ke pelanggan
      */
-    private function sendTelegramNotification(Transaction $transaction, string $status, ?string $notes = null): void
+    private function sendMailNotification(Transaction $transaction): void
     {
-        $botToken = config('services.telegram.bot_token');
-        $chatId   = config('services.telegram.chat_id');
-
-        if ($botToken && $chatId) {
-            $message = "📢 *Pembaruan Status Transaksi*\n\n"
-                     . "📄 *Kode Tracking:* `{$transaction->tracking_code}`\n"
-                     . "👤 *Pelanggan:* {$transaction->customer_name}\n"
-                     . "🔄 *Status Baru:* *{$status}*\n"
-                     . "📝 *Catatan:* " . ($notes ?: '-') . "\n";
-
+        if ($transaction->email) {
             try {
-                \Illuminate\Support\Facades\Http::post("https://api.telegram.org/bot{$botToken}/sendMessage", [
-                    'chat_id'    => $chatId,
-                    'text'       => $message,
-                    'parse_mode' => 'Markdown',
-                ]);
+                Mail::to($transaction->email)->send(new StatusLaundryMail($transaction));
             } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::error("Gagal mengirim notifikasi status Telegram: " . $e->getMessage());
+                Log::error("Gagal mengirim email status laundry ke pelanggan: " . $e->getMessage());
             }
         }
     }

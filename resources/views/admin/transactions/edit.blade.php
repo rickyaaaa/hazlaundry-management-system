@@ -15,18 +15,25 @@
         <div class="form-group"><label class="form-label">Customer Name</label><input type="text" name="customer_name" class="form-control" value="{{ old('customer_name',$transaction->customer_name) }}" required></div>
         <div class="form-group"><label class="form-label">Phone Number</label><input type="text" name="phone_number" class="form-control" value="{{ old('phone_number',$transaction->phone_number) }}" required></div>
     </div>
-    <div class="grid-2">
+    <div style="display: grid; grid-template-columns: 2fr 1.2fr 1fr; gap: 16px; margin-bottom: 15px;">
         <div class="form-group">
             <label class="form-label">Service Type</label>
             <select name="service_id" class="form-control" id="serviceSelect" required>
                 @foreach($services as $s)
                 <option value="{{ $s->id }}" data-price="{{ $s->price_per_kg }}" {{ old('service_id',$transaction->service_id)==$s->id?'selected':'' }}>
-                    {{ $s->name }} – Rp {{ number_format($s->price_per_kg,0,',','.') }}/kg
+                    {{ $s->name }} – Rp {{ number_format($s->price_per_kg,0,',','.') }}/pcs
                 </option>
                 @endforeach
             </select>
         </div>
-        <div class="form-group"><label class="form-label">Weight (KG)</label><input type="number" name="weight" id="weightInput" class="form-control" value="{{ old('weight',$transaction->weight) }}" min="0" step="0.1" required></div>
+        <div class="form-group">
+            <label class="form-label">Harga Satuan (Rp)</label>
+            <input type="number" name="price_per_kg" id="priceInput" class="form-control" value="{{ old('price_per_kg', $transaction->price_per_kg) }}" min="0" required>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Jumlah (Pcs)</label>
+            <input type="number" name="weight" id="weightInput" class="form-control" value="{{ old('weight', (int)$transaction->weight) }}" min="1" step="1" required>
+        </div>
     </div>
     <div class="grid-2">
         <div class="form-group">
@@ -40,6 +47,10 @@
             <label class="form-label">Pickup/Delivery Address</label>
             <textarea name="address" id="addressInput" class="form-control" rows="2" placeholder="Enter full address for pickup/delivery...">{{ old('address', $transaction->address) }}</textarea>
         </div>
+    </div>
+    <div class="form-group">
+        <label class="form-label">Customer Email</label>
+        <input type="email" name="email" class="form-control" value="{{ old('email', $transaction->email) }}" placeholder="customer@email.com" required>
     </div>
     <div class="form-group">
         <label class="form-label">Payment Status</label>
@@ -63,14 +74,26 @@
 @endsection
 @push('scripts')
 <script>
-function calc(){
-    const sel=document.getElementById('serviceSelect');
-    const price=parseFloat(sel.options[sel.selectedIndex]?.dataset?.price||0);
-    const w=parseFloat(document.getElementById('weightInput').value||0);
-    document.getElementById('sumTotal').textContent=(price*w).toLocaleString('id');
+const serviceSelect = document.getElementById('serviceSelect');
+const priceInput = document.getElementById('priceInput');
+const weightInput = document.getElementById('weightInput');
+
+function updatePriceField() {
+    const opt = serviceSelect.options[serviceSelect.selectedIndex];
+    priceInput.value = parseFloat(opt?.dataset?.price || 0);
+    calc();
 }
-document.getElementById('serviceSelect').addEventListener('change',calc);
-document.getElementById('weightInput').addEventListener('input',calc);
+
+function calc() {
+    const price = parseFloat(priceInput.value || 0);
+    const weight = parseInt(weightInput.value || 0);
+    document.getElementById('sumTotal').textContent = (price * weight).toLocaleString('id');
+}
+
+serviceSelect.addEventListener('change', updatePriceField);
+priceInput.addEventListener('input', calc);
+weightInput.addEventListener('input', calc);
+
 calc();
 
 // Handle delivery type & address toggle

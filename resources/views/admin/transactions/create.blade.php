@@ -72,8 +72,8 @@
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
         </div>
         <div>
-            <div style="font-size:10px; color:#64748b; font-weight:700; letter-spacing:0.8px; margin-bottom: 2px;">CURRENT RATE</div>
-            <div style="font-size:15px; font-weight:700; color:#0f172a;" id="currentRate">Rp 0 <span style="font-weight: 500; color: #64748b;">/ kg</span></div>
+            <div style="font-size:10px; color:#64748b; font-weight:700; letter-spacing:0.8px; margin-bottom: 2px;">HARGA SATUAN</div>
+            <div style="font-size:15px; font-weight:700; color:#0f172a;" id="currentRate">Rp 0 <span style="font-weight: 500; color: #64748b;">/ pcs</span></div>
         </div>
     </div>
 </div>
@@ -110,7 +110,7 @@
                     </div>
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                <div style="display: grid; grid-template-columns: 2fr 1.2fr 1fr; gap: 24px;">
                     <div class="tx-input-group">
                         <label class="tx-label">Service Type</label>
                         <div class="tx-icon-input">
@@ -126,11 +126,17 @@
                         </div>
                     </div>
                     <div class="tx-input-group">
-                        <label class="tx-label">Weight (KG)</label>
+                        <label class="tx-label">Harga Satuan (Rp)</label>
                         <div class="tx-icon-input">
-                            <svg><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-                            <input type="number" name="weight" id="weightInput" class="tx-control" placeholder="0.0" min="0.1" step="0.1" value="{{ old('weight') }}" required>
-                            <span style="position:absolute; right:16px; top:50%; transform:translateY(-50%); font-size:12px; font-weight:600; color:#94a3b8;">KG</span>
+                            <span style="position:absolute; left:14px; top:50%; transform:translateY(-50%); font-size:14px; font-weight:600; color:#94a3b8;">Rp</span>
+                            <input type="number" name="price_per_kg" id="priceInput" class="tx-control" style="padding-left: 38px;" placeholder="0" min="0" value="{{ old('price_per_kg') }}" required>
+                        </div>
+                    </div>
+                    <div class="tx-input-group">
+                        <label class="tx-label">Jumlah (Pcs)</label>
+                        <div class="tx-icon-input">
+                            <input type="number" name="weight" id="weightInput" class="tx-control" style="padding-left: 16px;" placeholder="1" min="1" step="1" value="{{ old('weight', 1) }}" required>
+                            <span style="position:absolute; right:16px; top:50%; transform:translateY(-50%); font-size:12px; font-weight:600; color:#94a3b8;">Pcs</span>
                         </div>
                     </div>
                 </div>
@@ -144,6 +150,13 @@
                                 <option value="drop_off" {{ old('delivery_type') == 'drop_off' ? 'selected' : '' }}>Drop Off</option>
                                 <option value="pickup_delivery" {{ old('delivery_type') == 'pickup_delivery' ? 'selected' : '' }}>Pickup & Delivery</option>
                             </select>
+                        </div>
+                    </div>
+                    <div class="tx-input-group">
+                        <label class="tx-label">Customer Email</label>
+                        <div class="tx-icon-input">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width:18px;height:18px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                            <input type="email" name="email" class="tx-control" style="padding-left: 42px;" placeholder="customer@email.com" value="{{ old('email') }}" required>
                         </div>
                     </div>
                 </div>
@@ -198,12 +211,12 @@
                 </div>
                 
                 <div class="os-row">
-                    <span>Base Rate (per kg)</span>
+                    <span>Harga Satuan</span>
                     <span id="sumRate">Rp 0</span>
                 </div>
                 <div class="os-row">
-                    <span>Calculated Weight</span>
-                    <span id="sumWeight" style="font-weight: 600; color: #ffffff;">0.0 kg</span>
+                    <span>Jumlah Pakaian</span>
+                    <span id="sumWeight" style="font-weight: 600; color: #ffffff;">0 pcs</span>
                 </div>
                 <div class="os-row">
                     <span>Service Charge</span>
@@ -268,21 +281,42 @@
 
 @push('scripts')
 <script>
-function calcPrice() {
-    const sel = document.getElementById('serviceSelect');
-    const opt = sel.options[sel.selectedIndex];
+const serviceSelect = document.getElementById('serviceSelect');
+const priceInput = document.getElementById('priceInput');
+const weightInput = document.getElementById('weightInput');
+
+function updatePriceField() {
+    const opt = serviceSelect.options[serviceSelect.selectedIndex];
     const price = parseFloat(opt?.dataset?.price || 0);
-    const weight = parseFloat(document.getElementById('weightInput').value || 0);
+    priceInput.value = price;
+    calcPrice();
+}
+
+function calcPrice() {
+    const price = parseFloat(priceInput.value || 0);
+    const weight = parseInt(weightInput.value || 0);
     const total = price * weight;
     
-    document.getElementById('currentRate').innerHTML = 'Rp ' + price.toLocaleString('id') + ' <span style="font-weight: 500; color: #64748b;">/ kg</span>';
+    document.getElementById('currentRate').innerHTML = 'Rp ' + price.toLocaleString('id') + ' <span style="font-weight: 500; color: #64748b;">/ pcs</span>';
     document.getElementById('sumRate').textContent = 'Rp ' + price.toLocaleString('id');
-    document.getElementById('sumWeight').textContent = weight.toFixed(1) + ' kg';
+    document.getElementById('sumWeight').textContent = weight + ' pcs';
     document.getElementById('sumTotal').textContent = total.toLocaleString('id');
 }
-document.getElementById('serviceSelect').addEventListener('change', calcPrice);
-document.getElementById('weightInput').addEventListener('input', calcPrice);
-calcPrice();
+
+serviceSelect.addEventListener('change', updatePriceField);
+priceInput.addEventListener('input', calcPrice);
+weightInput.addEventListener('input', calcPrice);
+
+// Initialize
+if (serviceSelect.value) {
+    if (!priceInput.value) {
+        updatePriceField();
+    } else {
+        calcPrice();
+    }
+} else {
+    calcPrice();
+}
 
 // Handle delivery type & address toggle
 const deliverySelect = document.getElementById('deliveryTypeSelect');

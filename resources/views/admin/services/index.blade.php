@@ -10,7 +10,7 @@
 </div>
 <div class="table-wrapper">
     <table>
-        <thead><tr><th>#</th><th>Nama Layanan</th><th>Deskripsi</th><th>Harga/kg</th><th>Total Transaksi</th><th>Status</th><th>Actions</th></tr></thead>
+        <thead><tr><th>#</th><th>Nama Layanan</th><th>Deskripsi</th><th>Harga Satuan</th><th>Total Transaksi</th><th>Status</th><th>Actions</th></tr></thead>
         <tbody>
         @forelse($services as $s)
         <tr>

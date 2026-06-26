@@ -4,13 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Models\Transaction;
 use App\Models\LaundryService;
+use App\Mail\StatusLaundryMail;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class TrackingController extends Controller
 {
     public function index()
     {
-        return view('tracking.index');
+        $promos = \App\Models\Promo::where('is_active', true)->latest()->get();
+        return view('tracking.index', compact('promos'));
     }
 
     public function track(Request $request)
@@ -32,11 +36,13 @@ class TrackingController extends Controller
 
         $statuses    = Transaction::STATUSES;
         $statusIndex = array_search($transaction->status, $statuses);
+        $promos      = \App\Models\Promo::where('is_active', true)->latest()->get();
 
         return view('tracking.result', compact(
             'transaction',
             'statuses',
-            'statusIndex'
+            'statusIndex',
+            'promos'
         ));
     }
 
@@ -54,6 +60,8 @@ class TrackingController extends Controller
             'address'       => 'required|string',
             'pickup_time'   => 'required|date|after:now',
             'service_id'    => 'required|exists:laundry_services,id',
+            'email'         => 'required|email|max:255',
+            'wants_promo'   => 'nullable',
         ]);
 
         $trackingCode = Transaction::generateTrackingCode();
@@ -71,6 +79,7 @@ class TrackingController extends Controller
             'weight'         => 0,
             'price_per_kg'   => 0,
             'total_price'    => 0,
+            'email'          => $request->email,
         ]);
 
         $transaction->statusHistories()->create([
@@ -78,32 +87,27 @@ class TrackingController extends Controller
             'changed_at' => now(),
         ]);
 
-        // Kirim Notifikasi Telegram ke Admin
-        $botToken = config('services.telegram.bot_token');
-        $chatId   = config('services.telegram.chat_id');
-
-        if ($botToken && $chatId) {
-            $transaction->load('service');
-            $serviceName = $transaction->service ? $transaction->service->name : 'N/A';
-            $pickupTime  = $transaction->pickup_time ? $transaction->pickup_time->format('d-m-Y H:i') : '-';
-
-            $message = "🔔 *Permintaan Antar-Jemput Baru*\n\n"
-                     . "📄 *Kode Tracking:* `{$transaction->tracking_code}`\n"
-                     . "👤 *Pelanggan:* {$transaction->customer_name}\n"
-                     . "📞 *No. HP:* {$transaction->phone_number}\n"
-                     . "📍 *Alamat:* {$transaction->address}\n"
-                     . "⏰ *Waktu Jemput:* {$pickupTime}\n"
-                     . "🧺 *Layanan:* {$serviceName}\n"
-                     . "🔄 *Status:* {$transaction->status}";
-
+        // Mendaftarkan subscriber jika mencentang checkbox promo
+        if ($request->has('wants_promo')) {
             try {
-                \Illuminate\Support\Facades\Http::post("https://api.telegram.org/bot{$botToken}/sendMessage", [
-                    'chat_id'    => $chatId,
-                    'text'       => $message,
-                    'parse_mode' => 'Markdown',
-                ]);
+                \App\Models\Subscriber::updateOrCreate(['email' => $request->email]);
+                
+                // Kirim email promo aktif terbaru jika ada
+                $latestPromo = \App\Models\Promo::where('is_active', true)->latest()->first();
+                if ($latestPromo) {
+                    Mail::to($request->email)->send(new \App\Mail\PromoMail($latestPromo));
+                }
             } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::error("Gagal mengirim notifikasi Telegram: " . $e->getMessage());
+                Log::error("Gagal mendaftarkan subscriber / mengirim email promo instan: " . $e->getMessage());
+            }
+        }
+
+        // Kirim email konfirmasi pesanan baru ke pelanggan
+        if ($transaction->email) {
+            try {
+                Mail::to($transaction->email)->send(new StatusLaundryMail($transaction));
+            } catch (\Exception $e) {
+                Log::error("Gagal mengirim email konfirmasi pesanan: " . $e->getMessage());
             }
         }
 

@@ -262,12 +262,12 @@
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="16 8 10 14 8 12"/></svg>
                             <span>{{ $transaction->service->name ?? 'Layanan' }}</span>
                         </div>
-                        <span class="item-val">Rp {{ number_format($transaction->price_per_kg,0,',','.') }}</span>
+                        <span class="item-val">Rp {{ number_format($transaction->price_per_kg,0,',','.') }} /pcs</span>
                     </div>
                     <div class="item-row">
                         <div class="item-left">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="16 8 10 14 8 12"/></svg>
-                            <span>Weight ({{ $transaction->weight }} kg)</span>
+                            <span>Jumlah ({{ (int)$transaction->weight }} pcs)</span>
                         </div>
                         <span class="item-val"></span>
                     </div>
@@ -307,6 +307,26 @@
             </div>
         </div>
 
+        @if(isset($promos) && $promos->isNotEmpty())
+        <div style="max-width: 1000px; margin: 40px auto 0;">
+            <h2 style="font-size: 22px; font-weight: 800; color: #003366; text-align: center; margin-bottom: 24px; letter-spacing: -0.5px;">Penawaran Spesial Untuk Anda</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px;">
+                @foreach($promos as $p)
+                <div style="background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; display: flex; flex-direction: column; height: 100%;">
+                    <div style="height: 180px; overflow: hidden; background: #e2e8f0; position: relative;">
+                        <img src="{{ $p->image_url }}" alt="{{ $p->title }}" style="width: 100%; height: 100%; object-fit: cover;">
+                        <div style="position: absolute; top: 12px; left: 12px; padding: 4px 10px; background: #f97316; color: white; font-size: 9px; font-weight: 800; border-radius: 50px; text-transform: uppercase; letter-spacing: 0.5px;">PROMO</div>
+                    </div>
+                    <div style="padding: 20px; display: flex; flex-direction: column; flex: 1;">
+                        <h3 style="font-size: 16px; font-weight: 700; color: #003366; margin: 0 0 8px 0; line-height: 1.3;">{{ $p->title }}</h3>
+                        <p style="font-size: 13px; color: #64748b; margin: 0 0 16px 0; line-height: 1.5; flex: 1;">{{ Str::limit($p->description, 120) }}</p>
+                        <a href="{{ route('tracking.pickup.form') }}" style="display: block; text-align: center; background: #003366; color: white; padding: 10px 0; border-radius: 8px; font-weight: 600; font-size: 13px; text-decoration: none; transition: background 0.2s;">Pesan Antar Jemput</a>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        </div>
+        @endif
     </div>
 </main>
 

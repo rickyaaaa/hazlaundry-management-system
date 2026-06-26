@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\TransactionController;
 use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\PromoController;
 use App\Http\Controllers\TrackingController;
 use App\Http\Controllers\ReceiptController;
 
@@ -16,8 +17,11 @@ use App\Http\Controllers\ReceiptController;
 |--------------------------------------------------------------------------
 */
 
-// ── Public: Root redirect ────────────────────────────────────────────────
-Route::get('/', fn () => redirect()->route('tracking.index'));
+// ── Public: Welcome / Landing Page ───────────────────────────────────────
+Route::get('/', function () {
+    $promos = \App\Models\Promo::where('is_active', true)->get();
+    return view('welcome', compact('promos'));
+})->name('welcome');
 
 // ── Public: Customer Tracking (NO LOGIN REQUIRED) ────────────────────────
 Route::get('/tracking',         [TrackingController::class, 'index'])->name('tracking.index');
@@ -66,6 +70,10 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
 
     // Services / Settings
     Route::resource('services', ServiceController::class)->except(['show']);
+
+    // Banners / Promos
+    Route::resource('promos', PromoController::class)->except(['show']);
+    Route::post('/promos/{promo}/broadcast', [PromoController::class, 'broadcast'])->name('promos.broadcast');
 
     // Users
     Route::resource('users', UserController::class);

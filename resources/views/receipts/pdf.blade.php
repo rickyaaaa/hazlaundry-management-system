@@ -39,8 +39,8 @@ td:last-child{font-weight:600;color:#111;text-align:right}
 <div class="section-title">Detail Order</div>
 <table>
     <tr><td>Layanan</td><td>{{ $transaction->service->name ?? '-' }}</td></tr>
-    <tr><td>Berat</td><td>{{ $transaction->weight }} kg</td></tr>
-    <tr><td>Harga/kg</td><td>Rp {{ number_format($transaction->price_per_kg,0,',','.') }}</td></tr>
+    <tr><td>Jumlah</td><td>{{ (int)$transaction->weight }} pcs</td></tr>
+    <tr><td>Harga Satuan</td><td>Rp {{ number_format($transaction->price_per_kg,0,',','.') }}</td></tr>
     <tr><td>Status</td><td>{{ $transaction->status }}</td></tr>
     <tr><td>Pembayaran</td><td><span class="badge badge-{{ $transaction->payment_status }}">{{ $transaction->payment_status=='lunas'?'LUNAS':'BELUM BAYAR' }}</span></td></tr>
     <tr><td>Tanggal Masuk</td><td>{{ $transaction->created_at->format('d/m/Y H:i') }}</td></tr>

@@ -41,6 +41,8 @@ class DashboardController extends Controller
             ->groupBy('status')
             ->pluck('total', 'status');
 
+        $activePromos = \App\Models\Promo::where('is_active', true)->get();
+
         return view('admin.dashboard', compact(
             'totalOrders',
             'inProcess',
@@ -49,7 +51,8 @@ class DashboardController extends Controller
             'recentTransactions',
             'monthlyRevenue',
             'statusCounts',
-            'pendingPickups'
+            'pendingPickups',
+            'activePromos'
         ));
     }
 }

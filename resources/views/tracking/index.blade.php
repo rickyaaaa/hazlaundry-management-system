@@ -55,10 +55,18 @@
         @csrf
         <div class="search-container">
             <svg style="margin-left: 12px; width: 20px; height: 20px; stroke: #94a3b8; fill: none; stroke-width: 2;" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input type="text" name="tracking_code" placeholder="Order ID or Phone Number" class="search-input" value="{{ old('tracking_code') }}">
+            <input type="text" name="tracking_code" placeholder="Order ID or Phone Number" class="search-input" value="{{ request('tracking_code', old('tracking_code')) }}">
             <button type="submit" class="search-btn">Track Order</button>
         </div>
     </form>
+
+    @if(request('tracking_code'))
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            document.querySelector('form').submit();
+        });
+    </script>
+    @endif
 
     <div style="max-width: 900px; margin: 60px auto 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;">
         <div class="how-card">
@@ -74,6 +82,27 @@
             <div style="font-size: 15px; font-weight: 600; color: #003366;">Selesai & Ambil</div>
         </div>
     </div>
+
+    @if(isset($promos) && $promos->isNotEmpty())
+    <div style="max-width: 900px; margin: 60px auto 0;">
+        <h2 style="font-size: 22px; font-weight: 800; color: #003366; text-align: center; margin-bottom: 24px; letter-spacing: -0.5px;">Penawaran Spesial Untuk Anda</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px;">
+            @foreach($promos as $p)
+            <div style="background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; display: flex; flex-direction: column; height: 100%;">
+                <div style="height: 180px; overflow: hidden; background: #e2e8f0; position: relative;">
+                    <img src="{{ $p->image_url }}" alt="{{ $p->title }}" style="width: 100%; height: 100%; object-fit: cover;">
+                    <div style="position: absolute; top: 12px; left: 12px; padding: 4px 10px; background: #f97316; color: white; font-size: 9px; font-weight: 800; border-radius: 50px; text-transform: uppercase; letter-spacing: 0.5px;">PROMO</div>
+                </div>
+                <div style="padding: 20px; display: flex; flex-direction: column; flex: 1;">
+                    <h3 style="font-size: 16px; font-weight: 700; color: #003366; margin: 0 0 8px 0; line-height: 1.3;">{{ $p->title }}</h3>
+                    <p style="font-size: 13px; color: #64748b; margin: 0 0 16px 0; line-height: 1.5; flex: 1;">{{ Str::limit($p->description, 120) }}</p>
+                    <a href="{{ route('tracking.pickup.form') }}" style="display: block; text-align: center; background: #003366; color: white; padding: 10px 0; border-radius: 8px; font-weight: 600; font-size: 13px; text-decoration: none; transition: background 0.2s;">Pesan Antar Jemput</a>
+                </div>
+            </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
 </main>
 
 <footer style="padding: 32px 40px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: #64748b;">

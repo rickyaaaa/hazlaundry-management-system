@@ -16,6 +16,7 @@ class Transaction extends Model
         'weight',
         'price_per_kg',
         'total_price',
+        'promo_used',
         'status',
         'payment_status',
         'notes',

@@ -79,6 +79,8 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::resource('users', UserController::class);
 
     // Reports
-    Route::get('/reports',            [ReportController::class, 'index'])->name('reports.index');
-    Route::get('/reports/export-pdf', [ReportController::class, 'exportPdf'])->name('reports.exportPdf');
+    Route::get('/reports',                  [ReportController::class, 'index'])->name('reports.index');
+    Route::get('/reports/export-pdf',       [ReportController::class, 'exportPdf'])->name('reports.exportPdf');
+    Route::get('/reports/promo',            [ReportController::class, 'promoReport'])->name('reports.promo');
+    Route::get('/reports/promo/export-pdf', [ReportController::class, 'exportPromoPdf'])->name('reports.promo.exportPdf');
 });

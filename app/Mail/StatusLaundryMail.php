@@ -5,6 +5,7 @@ namespace App\Mail;
 use App\Models\Transaction;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
@@ -48,6 +49,16 @@ class StatusLaundryMail extends Mailable
      */
     public function attachments(): array
     {
-        return [];
+        $qrisPath = public_path('images/qris.jpg');
+
+        if (! file_exists($qrisPath)) {
+            return [];
+        }
+
+        return [
+            Attachment::fromPath($qrisPath)
+                ->as('QRIS-HAZLaundry.jpg')
+                ->withMime('image/jpeg'),
+        ];
     }
 }

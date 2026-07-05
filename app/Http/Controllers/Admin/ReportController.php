@@ -119,4 +119,69 @@ class ReportController extends Controller
 
         return $pdf->download("laporan-laundry-{$year}.pdf");
     }
+
+    public function promoReport(Request $request)
+    {
+        $year  = $request->input('year', now()->year);
+        $month = $request->input('month', now()->month);
+
+        $promoUsage = Transaction::select(
+                'promo_used',
+                DB::raw('COUNT(*) as total_used'),
+                DB::raw('SUM(total_price) as revenue')
+            )
+            ->whereYear('created_at', $year)
+            ->whereMonth('created_at', $month)
+            ->whereNotNull('promo_used')
+            ->groupBy('promo_used')
+            ->orderByDesc('total_used')
+            ->get();
+
+        $totalPromoUsed  = $promoUsage->sum('total_used');
+        $totalTransactions = Transaction::whereYear('created_at', $year)
+            ->whereMonth('created_at', $month)
+            ->count();
+        $mostUsedPromo = $promoUsage->first();
+
+        $years = range(now()->year - 2, now()->year);
+
+        return view('admin.reports.promo', compact(
+            'promoUsage',
+            'totalPromoUsed',
+            'totalTransactions',
+            'mostUsedPromo',
+            'year',
+            'month',
+            'years'
+        ));
+    }
+
+    public function exportPromoPdf(Request $request)
+    {
+        $year  = $request->input('year', now()->year);
+        $month = $request->input('month', now()->month);
+
+        $promoUsage = Transaction::select(
+                'promo_used',
+                DB::raw('COUNT(*) as total_used'),
+                DB::raw('SUM(total_price) as revenue')
+            )
+            ->whereYear('created_at', $year)
+            ->whereMonth('created_at', $month)
+            ->whereNotNull('promo_used')
+            ->groupBy('promo_used')
+            ->orderByDesc('total_used')
+            ->get();
+
+        $totalPromoUsed = $promoUsage->sum('total_used');
+
+        $pdf = Pdf::loadView('admin.reports.promo-pdf', compact(
+            'promoUsage',
+            'totalPromoUsed',
+            'year',
+            'month'
+        ))->setPaper('a4', 'portrait');
+
+        return $pdf->download("laporan-promo-{$year}-{$month}.pdf");
+    }
 }

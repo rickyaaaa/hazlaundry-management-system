@@ -59,8 +59,8 @@
                                 <tr>
                                     <td align="center">
                                         <p style="margin: 0 0 16px 0; font-size: 14px; color: #334155; font-weight: 600; line-height: 1.5;">Silakan scan QRIS untuk melakukan pembayaran, tolong abaikan pesan ini jika sudah melakukan pembayaran</p>
-                                        @if(file_exists(public_path('images/qris.jpg')))
-                                            <img src="{{ $message->embed(public_path('images/qris.jpg')) }}" alt="QRIS HAZ Laundry" width="220" style="max-width: 220px; width: 100%; height: auto; border-radius: 12px; border: 1px solid #e2e8f0;">
+                                        @if(file_exists(public_path('images/qris.jpeg')))
+                                            <img src="{{ $message->embed(public_path('images/qris.jpeg')) }}" alt="QRIS HAZ Laundry" width="220" style="max-width: 220px; width: 100%; height: auto; border-radius: 12px; border: 1px solid #e2e8f0;">
                                         @endif
                                     </td>
                                 </tr>

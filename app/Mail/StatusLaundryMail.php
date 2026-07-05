@@ -49,7 +49,7 @@ class StatusLaundryMail extends Mailable
      */
     public function attachments(): array
     {
-        $qrisPath = public_path('images/qris.jpg');
+        $qrisPath = public_path('images/qris.jpeg');
 
         if (! file_exists($qrisPath)) {
             return [];
@@ -57,7 +57,7 @@ class StatusLaundryMail extends Mailable
 
         return [
             Attachment::fromPath($qrisPath)
-                ->as('QRIS-HAZLaundry.jpg')
+                ->as('QRIS-HAZLaundry.jpeg')
                 ->withMime('image/jpeg'),
         ];
     }

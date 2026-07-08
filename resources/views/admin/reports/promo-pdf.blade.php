@@ -21,21 +21,22 @@ tr:nth-child(even) td{background:#f8fafc}
 
 <table>
     <thead>
-        <tr><th>Nama Promo</th><th>Jumlah Digunakan</th><th>Total Revenue</th></tr>
+        <tr><th>Kode Promo</th><th>Potongan Diskon (%)</th><th>Jumlah Dipakai</th><th>Total Diskon</th></tr>
     </thead>
     <tbody>
-    @php $grandTotal=0; @endphp
+    @php $grandTotalDiscount=0; @endphp
     @forelse($promoUsage as $p)
-    @php $grandTotal += $p->revenue; @endphp
+    @php $grandTotalDiscount += $p->total_discount; @endphp
     <tr>
-        <td>{{ $p->promo_used }}</td>
+        <td>{{ $p->code }}</td>
+        <td>{{ $p->percentage }}%</td>
         <td>{{ $p->total_used }}</td>
-        <td>Rp {{ number_format($p->revenue,0,',','.') }}</td>
+        <td>Rp {{ number_format($p->total_discount,0,',','.') }}</td>
     </tr>
     @empty
-    <tr><td colspan="3">Belum ada promo yang digunakan pada periode ini</td></tr>
+    <tr><td colspan="4">Belum ada promo yang digunakan pada periode ini</td></tr>
     @endforelse
-    <tr><td colspan="2" class="total">TOTAL TRANSAKSI PAKAI PROMO</td><td class="total">{{ $totalPromoUsed }}</td></tr>
+    <tr><td colspan="2" class="total">TOTAL DIPAKAI: {{ $totalPromoUsed }}</td><td colspan="2" class="total">TOTAL DISKON: Rp {{ number_format($grandTotalDiscount,0,',','.') }}</td></tr>
     </tbody>
 </table>
 

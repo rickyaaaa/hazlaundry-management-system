@@ -32,6 +32,17 @@
                 </div>
 
                 <div class="form-group">
+                    <label class="form-label">Kode Promo</label>
+                    <input type="text" name="code" class="form-control" value="{{ old('code') }}" placeholder="Contoh: HAZ20" style="text-transform:uppercase">
+                    <span style="font-size: 11px; color: var(--text-3); display: block; margin-top: 4px;">Kode yang dimasukkan pelanggan saat checkout. Kosongkan jika promo ini hanya banner informasi (tanpa kode).</span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Persentase Diskon (%)</label>
+                    <input type="number" name="percentage" class="form-control" value="{{ old('percentage', 0) }}" min="0" max="100" placeholder="Contoh: 20">
+                </div>
+
+                <div class="form-group">
                     <label class="form-label">Deskripsi Promo</label>
                     <textarea name="description" class="form-control" rows="3" placeholder="Deskripsi detail promo (opsional)">{{ old('description') }}</textarea>
                 </div>

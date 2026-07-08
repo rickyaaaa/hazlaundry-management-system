@@ -16,6 +16,8 @@ class Promo extends Model
      */
     protected $fillable = [
         'title',
+        'code',
+        'percentage',
         'description',
         'image_path',
         'is_active',
@@ -27,7 +29,8 @@ class Promo extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'is_active' => 'boolean',
+        'is_active'  => 'boolean',
+        'percentage' => 'integer',
     ];
 
     /**

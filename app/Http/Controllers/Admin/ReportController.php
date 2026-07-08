@@ -120,22 +120,28 @@ class ReportController extends Controller
         return $pdf->download("laporan-laundry-{$year}.pdf");
     }
 
+    private function promoUsageQuery($year, $month)
+    {
+        return Transaction::select(
+                'transactions.promo_used as code',
+                'promos.percentage as percentage',
+                DB::raw('COUNT(transactions.id) as total_used'),
+                DB::raw('COALESCE(SUM(transactions.discount_amount), 0) as total_discount')
+            )
+            ->join('promos', 'promos.code', '=', 'transactions.promo_used')
+            ->whereNotNull('transactions.promo_used')
+            ->whereYear('transactions.created_at', $year)
+            ->whereMonth('transactions.created_at', $month)
+            ->groupBy('transactions.promo_used', 'promos.percentage')
+            ->orderByDesc('total_used');
+    }
+
     public function promoReport(Request $request)
     {
         $year  = $request->input('year', now()->year);
         $month = $request->input('month', now()->month);
 
-        $promoUsage = Transaction::select(
-                'promo_used',
-                DB::raw('COUNT(*) as total_used'),
-                DB::raw('SUM(total_price) as revenue')
-            )
-            ->whereYear('created_at', $year)
-            ->whereMonth('created_at', $month)
-            ->whereNotNull('promo_used')
-            ->groupBy('promo_used')
-            ->orderByDesc('total_used')
-            ->get();
+        $promoUsage = $this->promoUsageQuery($year, $month)->get();
 
         $totalPromoUsed  = $promoUsage->sum('total_used');
         $totalTransactions = Transaction::whereYear('created_at', $year)
@@ -161,17 +167,7 @@ class ReportController extends Controller
         $year  = $request->input('year', now()->year);
         $month = $request->input('month', now()->month);
 
-        $promoUsage = Transaction::select(
-                'promo_used',
-                DB::raw('COUNT(*) as total_used'),
-                DB::raw('SUM(total_price) as revenue')
-            )
-            ->whereYear('created_at', $year)
-            ->whereMonth('created_at', $month)
-            ->whereNotNull('promo_used')
-            ->groupBy('promo_used')
-            ->orderByDesc('total_used')
-            ->get();
+        $promoUsage = $this->promoUsageQuery($year, $month)->get();
 
         $totalPromoUsed = $promoUsage->sum('total_used');
 

@@ -34,7 +34,7 @@
     <div class="stat-card">
         <div class="stat-header"><div class="stat-icon stat-icon-orange"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div></div>
         <div class="stat-label">Promo Terpopuler</div>
-        <div class="stat-value" style="font-size:20px">{{ $mostUsedPromo->promo_used ?? '-' }}</div>
+        <div class="stat-value" style="font-size:20px">{{ $mostUsedPromo->code ?? '-' }}</div>
     </div>
 </div>
 
@@ -43,22 +43,17 @@
     <div class="card-header" style="padding-bottom:12px"><span class="card-title">Penggunaan Promo</span><span style="font-size:12px;color:var(--text-3)">{{ \Carbon\Carbon::create()->month($month)->locale('id')->isoFormat('MMMM') }} {{ $year }}</span></div>
     <div class="table-wrapper" style="border:none;box-shadow:none;border-radius:0">
         <table>
-            <thead><tr><th>Nama Promo</th><th>Jumlah Digunakan</th><th>Total Revenue</th></tr></thead>
+            <thead><tr><th>Kode Promo</th><th>Potongan Diskon (%)</th><th>Jumlah Dipakai</th><th>Total Diskon</th></tr></thead>
             <tbody>
-            @php $maxUsed = $promoUsage->max('total_used') ?: 1; @endphp
             @forelse($promoUsage as $p)
             <tr>
-                <td>
-                    <div style="font-weight:600;color:var(--text)">{{ $p->promo_used }}</div>
-                    <div style="height:6px;background:var(--bg);border-radius:50px;overflow:hidden;margin-top:6px;width:160px">
-                        <div style="width:{{ round(($p->total_used/$maxUsed)*100) }}%;height:100%;background:#003366;border-radius:50px"></div>
-                    </div>
-                </td>
+                <td style="font-weight:600;color:var(--text)">{{ $p->code }}</td>
+                <td>{{ $p->percentage }}%</td>
                 <td style="font-weight:700">{{ $p->total_used }}</td>
-                <td style="font-weight:600">Rp {{ number_format($p->revenue,0,',','.') }}</td>
+                <td style="font-weight:600">Rp {{ number_format($p->total_discount,0,',','.') }}</td>
             </tr>
             @empty
-            <tr><td colspan="3" class="text-center" style="padding:24px;color:var(--text-3)">Belum ada promo yang digunakan bulan ini</td></tr>
+            <tr><td colspan="4" class="text-center" style="padding:24px;color:var(--text-3)">Belum ada promo yang digunakan bulan ini</td></tr>
             @endforelse
             </tbody>
         </table>

@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="csrf-token" content="{{ csrf_token() }}">
 <title>Antar Jemput – HAZ Laundry</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -84,13 +85,18 @@
                 <select id="service_id" name="service_id" class="form-input" required>
                     <option value="">-- Pilih Layanan --</option>
                     @foreach($services as $service)
-                        <option value="{{ $service->id }}" {{ old('service_id') == $service->id ? 'selected' : '' }}>
+                        <option value="{{ $service->id }}" data-price="{{ $service->price_per_kg }}" {{ old('service_id') == $service->id ? 'selected' : '' }}>
                             {{ $service->name }} (Rp {{ number_format($service->price_per_kg, 0, ',', '.') }}/pcs)
                         </option>
                     @endforeach
                 </select>
             </div>
-            
+
+            <div class="form-group">
+                <label class="form-label" for="weight">Perkiraan Berat (kg)</label>
+                <input type="number" id="weight" name="weight" class="form-input" value="{{ old('weight', 1) }}" min="0.1" step="0.1" required>
+            </div>
+
             <div class="form-group">
                 <label class="form-label" for="pickup_time">Waktu Penjemputan</label>
                 <input type="datetime-local" id="pickup_time" name="pickup_time" class="form-input" value="{{ old('pickup_time') }}" required>
@@ -100,6 +106,32 @@
                 <label class="form-label" for="address">Alamat Lengkap</label>
                 <textarea id="address" name="address" class="form-input" rows="3" required>{{ old('address') }}</textarea>
             </div>
+
+            <div class="form-group">
+                <label class="form-label" for="promo_code">Kode Promo (Optional)</label>
+                <div style="display:flex; gap:8px;">
+                    <input type="text" id="promo_code" name="promo_code" class="form-input" style="text-transform:uppercase" value="{{ old('promo_code') }}" placeholder="Contoh: HAZ20">
+                    <button type="button" id="applyPromoBtn" style="white-space:nowrap; background:#003366; color:#fff; border:none; padding:0 20px; border-radius:8px; font-weight:600; font-size:13px; cursor:pointer;">Pakai Kode</button>
+                </div>
+                <span id="promoMessage" style="font-size:12px; display:block; margin-top:6px;"></span>
+            </div>
+
+            <div class="form-group" style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:16px;">
+                <div style="display:flex; justify-content:space-between; font-size:13px; color:#475569; margin-bottom:8px;">
+                    <span>Subtotal</span>
+                    <span id="subtotalDisplay">Rp 0</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; font-size:13px; color:#16a34a; margin-bottom:8px;">
+                    <span>Potongan Diskon</span>
+                    <span id="discountDisplay">- Rp 0</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; font-size:15px; font-weight:700; color:#003366; border-top:1px solid #e2e8f0; padding-top:8px;">
+                    <span>Total Akhir</span>
+                    <span id="totalDisplay">Rp 0</span>
+                </div>
+            </div>
+
+            <input type="hidden" id="discount_amount" name="discount_amount" value="0">
 
             <button type="submit" class="submit-btn">Pesan Sekarang</button>
         </form>
@@ -114,6 +146,101 @@
         <a href="#" class="nav-link" style="font-size: 13px;">FAQ</a>
     </div>
 </footer>
+
+<script>
+(function () {
+    const serviceSelect   = document.getElementById('service_id');
+    const weightInput     = document.getElementById('weight');
+    const promoCodeInput  = document.getElementById('promo_code');
+    const applyPromoBtn   = document.getElementById('applyPromoBtn');
+    const promoMessage    = document.getElementById('promoMessage');
+    const discountAmount  = document.getElementById('discount_amount');
+    const subtotalDisplay = document.getElementById('subtotalDisplay');
+    const discountDisplay = document.getElementById('discountDisplay');
+    const totalDisplay    = document.getElementById('totalDisplay');
+    const csrfToken       = document.querySelector('meta[name="csrf-token"]').content;
+
+    let currentDiscount = 0;
+
+    function formatRupiah(value) {
+        return 'Rp ' + Math.round(value).toLocaleString('id-ID');
+    }
+
+    function getSubtotal() {
+        const option = serviceSelect.options[serviceSelect.selectedIndex];
+        const price  = option ? parseFloat(option.dataset.price || 0) : 0;
+        const weight = parseFloat(weightInput.value || 0);
+        return price * weight;
+    }
+
+    function render() {
+        const subtotal = getSubtotal();
+        const total    = Math.max(subtotal - currentDiscount, 0);
+
+        subtotalDisplay.textContent = formatRupiah(subtotal);
+        discountDisplay.textContent = '- ' + formatRupiah(currentDiscount);
+        totalDisplay.textContent    = formatRupiah(total);
+        discountAmount.value        = currentDiscount;
+    }
+
+    function resetDiscount(message, isError) {
+        currentDiscount = 0;
+        promoMessage.style.color = isError ? '#dc2626' : '#64748b';
+        promoMessage.textContent = message || '';
+        render();
+    }
+
+    serviceSelect.addEventListener('change', () => resetDiscount());
+    weightInput.addEventListener('input', () => resetDiscount());
+
+    applyPromoBtn.addEventListener('click', async function () {
+        const code     = promoCodeInput.value.trim();
+        const subtotal = getSubtotal();
+
+        if (!code) {
+            resetDiscount('Masukkan kode promo terlebih dahulu.', true);
+            return;
+        }
+        if (subtotal <= 0) {
+            resetDiscount('Pilih layanan dan berat terlebih dahulu.', true);
+            return;
+        }
+
+        applyPromoBtn.disabled = true;
+        applyPromoBtn.textContent = 'Memeriksa...';
+
+        try {
+            const response = await fetch('{{ route('api.checkPromo') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                },
+                body: JSON.stringify({ code: code, subtotal: subtotal }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                currentDiscount = parseFloat(data.discount || 0);
+                promoMessage.style.color = '#16a34a';
+                promoMessage.textContent = `Kode "${data.code}" berhasil dipakai! Diskon ${data.percentage}%.`;
+                render();
+            } else {
+                resetDiscount(data.message || 'Kode promo tidak valid.', true);
+            }
+        } catch (e) {
+            resetDiscount('Gagal memeriksa kode promo. Silakan coba lagi.', true);
+        } finally {
+            applyPromoBtn.disabled = false;
+            applyPromoBtn.textContent = 'Pakai Kode';
+        }
+    });
+
+    render();
+})();
+</script>
 
 </body>
 </html>

@@ -33,6 +33,8 @@ class PromoController extends Controller
     {
         $request->validate([
             'title'       => 'required|string|max:255',
+            'code'        => 'nullable|string|max:50|unique:promos,code',
+            'percentage'  => 'nullable|integer|min:0|max:100',
             'description' => 'nullable|string',
             'image'       => 'nullable|image|mimes:jpeg,jpg,png|max:2048', // 2MB Max
         ]);
@@ -45,6 +47,8 @@ class PromoController extends Controller
 
         Promo::create([
             'title'       => $request->title,
+            'code'        => $request->code ? strtoupper($request->code) : null,
+            'percentage'  => $request->percentage ?? 0,
             'description' => $request->description,
             'image_path'  => $imagePath,
             'is_active'   => $request->has('is_active'),
@@ -69,6 +73,8 @@ class PromoController extends Controller
     {
         $request->validate([
             'title'       => 'required|string|max:255',
+            'code'        => 'nullable|string|max:50|unique:promos,code,' . $promo->id,
+            'percentage'  => 'nullable|integer|min:0|max:100',
             'description' => 'nullable|string',
             'image'       => 'nullable|image|mimes:jpeg,jpg,png|max:2048', // 2MB Max
         ]);
@@ -85,6 +91,8 @@ class PromoController extends Controller
 
         $promo->update([
             'title'       => $request->title,
+            'code'        => $request->code ? strtoupper($request->code) : null,
+            'percentage'  => $request->percentage ?? 0,
             'description' => $request->description,
             'image_path'  => $imagePath,
             'is_active'   => $request->has('is_active'),
@@ -108,6 +116,43 @@ class PromoController extends Controller
 
         return redirect()->route('admin.promos.index')
                          ->with('success', 'Promo berhasil dihapus.');
+    }
+
+    /**
+     * Check a promo code and calculate the discount for a given subtotal.
+     * Public endpoint used by the customer pickup form (no auth required).
+     */
+    public function checkPromo(Request $request)
+    {
+        $validated = $request->validate([
+            'code'     => 'required|string|max:50',
+            'subtotal' => 'required|numeric|min:0',
+        ]);
+
+        $promo = Promo::where('is_active', true)
+            ->whereNotNull('code')
+            ->whereRaw('UPPER(code) = ?', [strtoupper($validated['code'])])
+            ->first();
+
+        if (! $promo) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Kode promo tidak ditemukan atau sudah tidak aktif.',
+            ], 404);
+        }
+
+        $subtotal   = (float) $validated['subtotal'];
+        $percentage = (int) $promo->percentage;
+        $discount   = round($subtotal * $percentage / 100);
+        $total      = max($subtotal - $discount, 0);
+
+        return response()->json([
+            'success'    => true,
+            'code'       => $promo->code,
+            'percentage' => $percentage,
+            'discount'   => $discount,
+            'total'      => $total,
+        ]);
     }
 
     /**

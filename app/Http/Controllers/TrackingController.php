@@ -60,26 +60,52 @@ class TrackingController extends Controller
             'address'       => 'required|string',
             'pickup_time'   => 'required|date|after:now',
             'service_id'    => 'required|exists:laundry_services,id',
+            'weight'        => 'required|numeric|min:0.1',
             'email'         => 'required|email|max:255',
             'wants_promo'   => 'nullable',
+            'promo_code'    => 'nullable|string|max:50',
         ]);
 
         $trackingCode = Transaction::generateTrackingCode();
 
+        $service    = LaundryService::findOrFail($request->service_id);
+        $weight     = (float) $request->weight;
+        $pricePerKg = (float) $service->price_per_kg;
+        $subtotal   = $pricePerKg * $weight;
+
+        $promoUsed      = null;
+        $discountAmount = 0;
+
+        if ($request->filled('promo_code')) {
+            $promo = \App\Models\Promo::where('is_active', true)
+                ->whereNotNull('code')
+                ->whereRaw('UPPER(code) = ?', [strtoupper($request->promo_code)])
+                ->first();
+
+            if ($promo) {
+                $promoUsed      = $promo->code;
+                $discountAmount = round($subtotal * $promo->percentage / 100);
+            }
+        }
+
+        $totalPrice = max($subtotal - $discountAmount, 0);
+
         $transaction = Transaction::create([
-            'tracking_code'  => $trackingCode,
-            'customer_name'  => $request->customer_name,
-            'phone_number'   => $request->phone_number,
-            'address'        => $request->address,
-            'pickup_time'    => $request->pickup_time,
-            'service_id'     => $request->service_id,
-            'delivery_type'  => 'pickup_delivery',
-            'status'         => 'Menunggu Jemputan',
-            'payment_status' => 'belum_bayar',
-            'weight'         => 0,
-            'price_per_kg'   => 0,
-            'total_price'    => 0,
-            'email'          => $request->email,
+            'tracking_code'   => $trackingCode,
+            'customer_name'   => $request->customer_name,
+            'phone_number'    => $request->phone_number,
+            'address'         => $request->address,
+            'pickup_time'     => $request->pickup_time,
+            'service_id'      => $request->service_id,
+            'delivery_type'   => 'pickup_delivery',
+            'status'          => 'Menunggu Jemputan',
+            'payment_status'  => 'belum_bayar',
+            'weight'          => $weight,
+            'price_per_kg'    => $pricePerKg,
+            'total_price'     => $totalPrice,
+            'promo_used'      => $promoUsed,
+            'discount_amount' => $discountAmount,
+            'email'           => $request->email,
         ]);
 
         $transaction->statusHistories()->create([

@@ -28,6 +28,7 @@ Route::get('/tracking',         [TrackingController::class, 'index'])->name('tra
 Route::post('/tracking',        [TrackingController::class, 'track'])->name('tracking.track');
 Route::get('/pickup',           [TrackingController::class, 'showPickupForm'])->name('tracking.pickup.form');
 Route::post('/pickup',          [TrackingController::class, 'storePickup'])->name('tracking.pickup.store');
+Route::post('/api/check-promo', [PromoController::class, 'checkPromo'])->name('api.checkPromo');
 
 // ── Public: Pricing & Support ────────────────────────────────────────────────
 Route::get('/pricing', function () {

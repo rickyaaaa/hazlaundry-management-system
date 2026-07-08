@@ -17,6 +17,7 @@ class Transaction extends Model
         'price_per_kg',
         'total_price',
         'promo_used',
+        'discount_amount',
         'status',
         'payment_status',
         'notes',
@@ -31,6 +32,7 @@ class Transaction extends Model
         'weight' => 'decimal:2',
         'price_per_kg' => 'decimal:2',
         'total_price' => 'decimal:2',
+        'discount_amount' => 'decimal:2',
         'estimated_completion' => 'datetime',
         'pickup_time' => 'datetime',
     ];

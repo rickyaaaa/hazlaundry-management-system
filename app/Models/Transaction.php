@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Transaction extends Model
@@ -59,6 +60,18 @@ class Transaction extends Model
     public function service(): BelongsTo
     {
         return $this->belongsTo(LaundryService::class, 'service_id');
+    }
+
+    /**
+     * Multi-layanan (many-to-many) untuk transaksi yang dibuat lewat form multi-layanan.
+     * Field 'service_id'/'weight'/'price_per_kg' tetap disimpan sebagai ringkasan
+     * (layanan pertama & agregat) agar halaman lama tetap kompatibel.
+     */
+    public function laundryServices(): BelongsToMany
+    {
+        return $this->belongsToMany(LaundryService::class, 'transaction_laundry_service')
+            ->withPivot(['quantity', 'price_per_kg', 'subtotal'])
+            ->withTimestamps();
     }
 
     public function statusHistories(): HasMany

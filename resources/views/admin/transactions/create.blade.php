@@ -46,6 +46,17 @@
 .g-title { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
 .g-desc { font-size: 12px; color: rgba(255,255,255,0.9); line-height: 1.4; }
 
+.service-rows { display: flex; flex-direction: column; gap: 12px; }
+.service-row { display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 12px; align-items: center; }
+.service-row-total { font-size: 13px; font-weight: 600; color: #0f172a; text-align: right; white-space: nowrap; }
+.btn-remove-row { width: 36px; height: 36px; border-radius: 8px; border: 1px solid #fca5a5; background: #fef2f2; color: #dc2626; font-size: 18px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.btn-remove-row:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-add-service { margin-top: 12px; background: #eef2ff; color: #003366; border: 1px dashed #94a3b8; border-radius: 8px; padding: 10px 16px; font-weight: 600; font-size: 13px; cursor: pointer; width: 100%; }
+.btn-add-service:hover { background: #e0e7ff; }
+.promo-row { display: flex; gap: 8px; }
+.btn-apply-promo { white-space: nowrap; background: #003366; color: #fff; border: none; padding: 0 20px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; }
+.btn-apply-promo:disabled { opacity: 0.6; cursor: not-allowed; }
+
 .quick-check { background: #ffffff; border-radius: 16px; padding: 24px; margin-top: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.02); }
 .qc-title { font-size: 13px; font-weight: 600; color: #64748b; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 16px; }
 .qc-item { display: flex; align-items: center; gap: 12px; font-size: 13px; color: #64748b; margin-bottom: 12px; }
@@ -72,8 +83,8 @@
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
         </div>
         <div>
-            <div style="font-size:10px; color:#64748b; font-weight:700; letter-spacing:0.8px; margin-bottom: 2px;">HARGA SATUAN</div>
-            <div style="font-size:15px; font-weight:700; color:#0f172a;" id="currentRate">Rp 0 <span style="font-weight: 500; color: #64748b;">/ pcs</span></div>
+            <div style="font-size:10px; color:#64748b; font-weight:700; letter-spacing:0.8px; margin-bottom: 2px;">TOTAL PCS</div>
+            <div style="font-size:15px; font-weight:700; color:#0f172a;" id="currentRate">0 <span style="font-weight: 500; color: #64748b;">pcs</span></div>
         </div>
     </div>
 </div>
@@ -110,35 +121,19 @@
                     </div>
                 </div>
 
-                <div style="display: grid; grid-template-columns: 2fr 1.2fr 1fr; gap: 24px;">
-                    <div class="tx-input-group">
-                        <label class="tx-label">Service Type</label>
-                        <div class="tx-icon-input">
-                            <svg><path d="M20.2 7.8l-7.7 7.7-4-4-5.5 5.5"/><polyline points="16 7.8 20.2 7.8 20.2 12"/></svg>
-                            <select name="service_id" class="tx-control" id="serviceSelect" required>
-                                <option value="">Select Service...</option>
-                                @foreach($services as $s)
-                                <option value="{{ $s->id }}" data-price="{{ $s->price_per_kg }}" {{ old('service_id')==$s->id?'selected':'' }}>
-                                    {{ $s->name }}
-                                </option>
-                                @endforeach
-                            </select>
-                        </div>
+                <div class="tx-input-group">
+                    <label class="tx-label">Pilih Layanan (Multi-Layanan)</label>
+                    <div id="serviceRows" class="service-rows"></div>
+                    <button type="button" id="addServiceRow" class="btn-add-service">+ Tambah Layanan</button>
+                </div>
+
+                <div class="tx-input-group">
+                    <label class="tx-label">Kode Promo (Opsional)</label>
+                    <div class="promo-row">
+                        <input type="text" id="promoCodeInput" name="promo_code" class="tx-control" style="text-transform:uppercase" placeholder="Contoh: HAZ20" value="{{ old('promo_code') }}">
+                        <button type="button" id="applyPromoBtn" class="btn-apply-promo">Pakai Kode</button>
                     </div>
-                    <div class="tx-input-group">
-                        <label class="tx-label">Harga Satuan (Rp)</label>
-                        <div class="tx-icon-input">
-                            <span style="position:absolute; left:14px; top:50%; transform:translateY(-50%); font-size:14px; font-weight:600; color:#94a3b8;">Rp</span>
-                            <input type="number" name="price_per_kg" id="priceInput" class="tx-control" style="padding-left: 38px;" placeholder="0" min="0" value="{{ old('price_per_kg') }}" required>
-                        </div>
-                    </div>
-                    <div class="tx-input-group">
-                        <label class="tx-label">Jumlah (Pcs)</label>
-                        <div class="tx-icon-input">
-                            <input type="number" name="weight" id="weightInput" class="tx-control" style="padding-left: 16px;" placeholder="1" min="1" step="1" value="{{ old('weight', 1) }}" required>
-                            <span style="position:absolute; right:16px; top:50%; transform:translateY(-50%); font-size:12px; font-weight:600; color:#94a3b8;">Pcs</span>
-                        </div>
-                    </div>
+                    <span id="promoMessage" style="font-size:12px; display:block; margin-top:6px;"></span>
                 </div>
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
@@ -211,18 +206,22 @@
                 </div>
                 
                 <div class="os-row">
-                    <span>Harga Satuan</span>
-                    <span id="sumRate">Rp 0</span>
+                    <span>Jumlah Layanan</span>
+                    <span id="sumServiceCount">0 layanan</span>
                 </div>
                 <div class="os-row">
                     <span>Jumlah Pakaian</span>
                     <span id="sumWeight" style="font-weight: 600; color: #ffffff;">0 pcs</span>
                 </div>
                 <div class="os-row">
-                    <span>Service Charge</span>
-                    <span>Rp 0</span>
+                    <span>Subtotal</span>
+                    <span id="sumSubtotal">Rp 0</span>
                 </div>
-                
+                <div class="os-row" id="discountRow" style="display:none; color:#4ade80;">
+                    <span>Diskon Promo</span>
+                    <span id="sumDiscount">- Rp 0</span>
+                </div>
+
                 <div class="os-row total">
                     <div>
                         <div class="os-label">Total Price</div>
@@ -281,42 +280,162 @@
 
 @push('scripts')
 <script>
-const serviceSelect = document.getElementById('serviceSelect');
-const priceInput = document.getElementById('priceInput');
-const weightInput = document.getElementById('weightInput');
+const servicesData = @json($services->map(fn($s) => ['id' => $s->id, 'name' => $s->name, 'price' => (float) $s->price_per_kg]));
+const serviceRows  = document.getElementById('serviceRows');
+const addRowBtn     = document.getElementById('addServiceRow');
+let rowIndex = 0;
 
-function updatePriceField() {
-    const opt = serviceSelect.options[serviceSelect.selectedIndex];
-    const price = parseFloat(opt?.dataset?.price || 0);
-    priceInput.value = price;
-    calcPrice();
+function formatRupiah(value) {
+    return 'Rp ' + Math.round(value).toLocaleString('id-ID');
 }
 
-function calcPrice() {
-    const price = parseFloat(priceInput.value || 0);
-    const weight = parseInt(weightInput.value || 0);
-    const total = price * weight;
-    
-    document.getElementById('currentRate').innerHTML = 'Rp ' + price.toLocaleString('id') + ' <span style="font-weight: 500; color: #64748b;">/ pcs</span>';
-    document.getElementById('sumRate').textContent = 'Rp ' + price.toLocaleString('id');
-    document.getElementById('sumWeight').textContent = weight + ' pcs';
-    document.getElementById('sumTotal').textContent = total.toLocaleString('id');
+function buildServiceOptions(selectedId) {
+    let html = '<option value="">Pilih Layanan...</option>';
+    servicesData.forEach(s => {
+        const selected = (selectedId && String(selectedId) === String(s.id)) ? 'selected' : '';
+        html += `<option value="${s.id}" data-price="${s.price}" ${selected}>${s.name}</option>`;
+    });
+    return html;
 }
 
-serviceSelect.addEventListener('change', updatePriceField);
-priceInput.addEventListener('input', calcPrice);
-weightInput.addEventListener('input', calcPrice);
+function addServiceRow(selectedId, qty) {
+    const index = rowIndex++;
+    const row = document.createElement('div');
+    row.className = 'service-row';
+    row.dataset.index = index;
+    row.innerHTML = `
+        <select name="services[${index}][service_id]" class="tx-control service-select" required>
+            ${buildServiceOptions(selectedId)}
+        </select>
+        <input type="number" name="services[${index}][weight]" class="tx-control service-qty" placeholder="Jumlah (pcs)" min="1" step="1" value="${qty || 1}" required>
+        <span class="service-row-total">Rp 0</span>
+        <button type="button" class="btn-remove-row" title="Hapus layanan">&times;</button>
+    `;
+    serviceRows.appendChild(row);
 
-// Initialize
-if (serviceSelect.value) {
-    if (!priceInput.value) {
-        updatePriceField();
+    row.querySelector('.service-select').addEventListener('change', recalcAll);
+    row.querySelector('.service-qty').addEventListener('input', recalcAll);
+    row.querySelector('.btn-remove-row').addEventListener('click', () => {
+        row.remove();
+        recalcAll();
+    });
+
+    updateRemoveButtons();
+    recalcAll();
+}
+
+function updateRemoveButtons() {
+    const rows = serviceRows.querySelectorAll('.service-row');
+    rows.forEach(r => {
+        r.querySelector('.btn-remove-row').disabled = rows.length <= 1;
+    });
+}
+
+function getSubtotal() {
+    let subtotal = 0;
+    let totalQty = 0;
+    const rows = serviceRows.querySelectorAll('.service-row');
+
+    rows.forEach(row => {
+        const select = row.querySelector('.service-select');
+        const qtyInput = row.querySelector('.service-qty');
+        const opt = select.options[select.selectedIndex];
+        const price = parseFloat(opt?.dataset?.price || 0);
+        const qty = parseInt(qtyInput.value || 0);
+        const lineTotal = price * qty;
+
+        row.querySelector('.service-row-total').textContent = formatRupiah(lineTotal);
+
+        subtotal += lineTotal;
+        totalQty += qty;
+    });
+
+    return { subtotal, totalQty, rowCount: rows.length };
+}
+
+let currentDiscount = 0;
+
+function recalcAll() {
+    const { subtotal, totalQty, rowCount } = getSubtotal();
+    const total = Math.max(subtotal - currentDiscount, 0);
+
+    document.getElementById('currentRate').innerHTML = totalQty + ' <span style="font-weight: 500; color: #64748b;">pcs</span>';
+    document.getElementById('sumServiceCount').textContent = rowCount + ' layanan';
+    document.getElementById('sumWeight').textContent = totalQty + ' pcs';
+    document.getElementById('sumSubtotal').textContent = formatRupiah(subtotal);
+    document.getElementById('sumTotal').textContent = Math.round(total).toLocaleString('id');
+
+    const discountRow = document.getElementById('discountRow');
+    if (currentDiscount > 0) {
+        discountRow.style.display = 'flex';
+        document.getElementById('sumDiscount').textContent = '- ' + formatRupiah(currentDiscount);
     } else {
-        calcPrice();
+        discountRow.style.display = 'none';
     }
-} else {
-    calcPrice();
 }
+
+addRowBtn.addEventListener('click', () => addServiceRow());
+
+// Promo code
+const promoCodeInput = document.getElementById('promoCodeInput');
+const applyPromoBtn  = document.getElementById('applyPromoBtn');
+const promoMessage   = document.getElementById('promoMessage');
+const csrfToken      = document.querySelector('meta[name="csrf-token"]').content;
+
+function resetDiscount(message, isError) {
+    currentDiscount = 0;
+    promoMessage.style.color = isError ? '#dc2626' : '#64748b';
+    promoMessage.textContent = message || '';
+    recalcAll();
+}
+
+applyPromoBtn.addEventListener('click', async function () {
+    const code = promoCodeInput.value.trim();
+    const { subtotal } = getSubtotal();
+
+    if (!code) {
+        resetDiscount('Masukkan kode promo terlebih dahulu.', true);
+        return;
+    }
+    if (subtotal <= 0) {
+        resetDiscount('Pilih layanan dan jumlah terlebih dahulu.', true);
+        return;
+    }
+
+    applyPromoBtn.disabled = true;
+    applyPromoBtn.textContent = 'Memeriksa...';
+
+    try {
+        const response = await fetch('{{ route('api.checkPromo') }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+            },
+            body: JSON.stringify({ code: code, subtotal: subtotal }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+            currentDiscount = parseFloat(data.discount || 0);
+            promoMessage.style.color = '#16a34a';
+            promoMessage.textContent = `Kode "${data.code}" berhasil dipakai! Diskon ${data.percentage}%.`;
+            recalcAll();
+        } else {
+            resetDiscount(data.message || 'Kode promo tidak valid.', true);
+        }
+    } catch (e) {
+        resetDiscount('Gagal memeriksa kode promo. Silakan coba lagi.', true);
+    } finally {
+        applyPromoBtn.disabled = false;
+        applyPromoBtn.textContent = 'Pakai Kode';
+    }
+});
+
+// Initialize with one service row
+addServiceRow();
 
 // Handle delivery type & address toggle
 const deliverySelect = document.getElementById('deliveryTypeSelect');

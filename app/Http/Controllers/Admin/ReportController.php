@@ -5,17 +5,20 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Transaction;
 use App\Models\LaundryService;
+use App\Exports\MonthlyReportExport;
+use App\Exports\PromoReportExport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ReportController extends Controller
 {
     public function index(Request $request)
     {
         $type  = $request->input('type', 'monthly');   // daily | monthly
-        $year  = $request->input('year', now()->year);
-        $month = $request->input('month', now()->month);
+        $year  = (int) $request->input('year', now()->year);
+        $month = (int) $request->input('month', now()->month);
 
         // Monthly revenue (12 months of selected year)
         $monthlyRevenue = Transaction::select(
@@ -89,8 +92,8 @@ class ReportController extends Controller
 
     public function exportPdf(Request $request)
     {
-        $year  = $request->input('year', now()->year);
-        $month = $request->input('month', now()->month);
+        $year  = (int) $request->input('year', now()->year);
+        $month = (int) $request->input('month', now()->month);
 
         $monthlyRevenue = Transaction::select(
                 DB::raw('MONTH(created_at) as month'),
@@ -120,7 +123,14 @@ class ReportController extends Controller
         return $pdf->download("laporan-laundry-{$year}.pdf");
     }
 
-    private function promoUsageQuery($year, $month)
+    public function exportExcel(Request $request)
+    {
+        $year = (int) $request->input('year', now()->year);
+
+        return Excel::download(new MonthlyReportExport($year), "laporan-bulanan-{$year}.xlsx");
+    }
+
+    public static function promoUsageQuery($year, $month)
     {
         return Transaction::select(
                 'transactions.promo_used as code',
@@ -138,8 +148,8 @@ class ReportController extends Controller
 
     public function promoReport(Request $request)
     {
-        $year  = $request->input('year', now()->year);
-        $month = $request->input('month', now()->month);
+        $year  = (int) $request->input('year', now()->year);
+        $month = (int) $request->input('month', now()->month);
 
         $promoUsage = $this->promoUsageQuery($year, $month)->get();
 
@@ -164,8 +174,8 @@ class ReportController extends Controller
 
     public function exportPromoPdf(Request $request)
     {
-        $year  = $request->input('year', now()->year);
-        $month = $request->input('month', now()->month);
+        $year  = (int) $request->input('year', now()->year);
+        $month = (int) $request->input('month', now()->month);
 
         $promoUsage = $this->promoUsageQuery($year, $month)->get();
 
@@ -179,5 +189,16 @@ class ReportController extends Controller
         ))->setPaper('a4', 'portrait');
 
         return $pdf->download("laporan-promo-{$year}-{$month}.pdf");
+    }
+
+    public function exportPromoExcel(Request $request)
+    {
+        $year  = (int) $request->input('year', now()->year);
+        $month = (int) $request->input('month', now()->month);
+
+        return Excel::download(
+            new PromoReportExport((int) $year, (int) $month),
+            "laporan-promo-{$year}-{$month}.xlsx"
+        );
     }
 }

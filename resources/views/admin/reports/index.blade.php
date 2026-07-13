@@ -10,7 +10,11 @@
         </a>
         <a href="{{ route('admin.reports.exportPdf',['year'=>$year,'month'=>$month]) }}" class="btn-secondary">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Export PDF
+            Cetak PDF
+        </a>
+        <a href="{{ route('admin.reports.exportExcel',['year'=>$year,'month'=>$month]) }}" class="btn-secondary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="21"/><line x1="15" y1="15" x2="9" y2="21"/></svg>
+            Cetak Excel
         </a>
         <form method="GET" style="display:flex;gap:8px">
             <select name="year" class="filter-select" onchange="this.form.submit()">
@@ -138,10 +142,14 @@ for(let i=1;i<=12;i++){
     const f = mData.find ? [...Object.values(mData)].find(d=>d.month==i) : null;
     mValues.push(f ? parseFloat(f.revenue) : 0);
 }
+if (typeof Chart === 'undefined') {
+    console.error('Chart.js gagal dimuat (file public/js/vendor/chart.umd.min.js hilang atau belum di-deploy).');
+} else {
 new Chart(document.getElementById('monthlyChart'), {
     type: 'bar',
     data: { labels: mLabels, datasets: [{ label: 'Revenue', data: mValues, backgroundColor: '#003366', borderRadius: 6, borderSkipped: false }] },
     options: { plugins:{legend:{display:false}}, scales:{x:{grid:{display:false}},y:{ticks:{callback:v=>'Rp '+v.toLocaleString('id')},grid:{color:'#f0f2f5'}}}, maintainAspectRatio:false, responsive:true }
 });
+}
 </script>
 @endpush

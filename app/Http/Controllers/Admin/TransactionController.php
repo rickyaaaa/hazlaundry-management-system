@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\Transaction;
 use App\Models\TransactionStatus;
 use App\Models\LaundryService;
+use App\Models\Promo;
 use App\Mail\StatusLaundryMail;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 
@@ -56,46 +58,101 @@ class TransactionController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'customer_name'  => 'required|string|max:255',
-            'phone_number'   => 'required|string|max:20',
-            'service_id'     => 'required|exists:laundry_services,id',
-            'weight'         => 'required|integer|min:1',
-            'price_per_kg'   => 'required|numeric|min:0',
-            'notes'          => 'nullable|string|max:500',
-            'payment_status' => 'required|in:lunas,belum_bayar',
-            'delivery_type'  => 'required|in:drop_off,pickup_delivery',
-            'address'        => 'nullable|required_if:delivery_type,pickup_delivery|string|max:1000',
-            'email'          => 'required|email|max:255',
+            'customer_name'            => 'required|string|max:255',
+            'phone_number'             => 'required|string|max:20',
+            'services'                 => 'required|array|min:1',
+            'services.*.service_id'    => 'required|exists:laundry_services,id',
+            'services.*.weight'        => 'required|integer|min:1',
+            'promo_code'               => 'nullable|string|max:50',
+            'notes'                    => 'nullable|string|max:500',
+            'payment_status'           => 'required|in:lunas,belum_bayar',
+            'delivery_type'            => 'required|in:drop_off,pickup_delivery',
+            'address'                  => 'nullable|required_if:delivery_type,pickup_delivery|string|max:1000',
+            'email'                    => 'required|email|max:255',
         ]);
 
-        $pricePerKg   = $validated['price_per_kg'];
-        $totalPrice   = $pricePerKg * $validated['weight'];
+        // Hitung subtotal per baris layanan berdasarkan harga resmi di database
+        // (bukan dari input klien) supaya harga tidak bisa dimanipulasi.
+        $serviceLines = [];
+        $subtotal     = 0;
+
+        foreach ($validated['services'] as $line) {
+            $service  = LaundryService::findOrFail($line['service_id']);
+            $qty      = (int) $line['weight'];
+            $lineTotal = $service->price_per_kg * $qty;
+
+            $serviceLines[] = [
+                'service'   => $service,
+                'quantity'  => $qty,
+                'unit_price' => $service->price_per_kg,
+                'subtotal'  => $lineTotal,
+            ];
+
+            $subtotal += $lineTotal;
+        }
+
+        // Validasi & hitung ulang diskon promo di server (jangan percaya nilai dari klien)
+        $promoUsed      = null;
+        $discountAmount = 0;
+
+        if ($request->filled('promo_code')) {
+            $promo = Promo::where('is_active', true)
+                ->whereNotNull('code')
+                ->whereRaw('UPPER(code) = ?', [strtoupper($validated['promo_code'])])
+                ->first();
+
+            if ($promo) {
+                $promoUsed      = $promo->code;
+                $discountAmount = round($subtotal * $promo->percentage / 100);
+            }
+        }
+
+        $totalPrice   = max($subtotal - $discountAmount, 0);
+        $totalWeight  = array_sum(array_column($serviceLines, 'quantity'));
         $trackingCode = Transaction::generateTrackingCode();
+        $firstService = $serviceLines[0]['service'];
 
-        $transaction = Transaction::create([
-            'tracking_code'        => $trackingCode,
-            'delivery_type'        => $validated['delivery_type'],
-            'customer_name'        => $validated['customer_name'],
-            'phone_number'         => $validated['phone_number'],
-            'address'              => $validated['address'] ?? null,
-            'service_id'           => $validated['service_id'],
-            'weight'               => $validated['weight'],
-            'price_per_kg'         => $pricePerKg,
-            'total_price'          => $totalPrice,
-            'status'               => 'Diproses',
-            'payment_status'       => $validated['payment_status'],
-            'notes'                => $validated['notes'] ?? null,
-            'estimated_completion' => now()->addDays(2),
-            'email'                => $validated['email'],
-        ]);
+        $transaction = DB::transaction(function () use (
+            $validated, $trackingCode, $firstService, $totalWeight,
+            $totalPrice, $promoUsed, $discountAmount, $serviceLines
+        ) {
+            $transaction = Transaction::create([
+                'tracking_code'        => $trackingCode,
+                'delivery_type'        => $validated['delivery_type'],
+                'customer_name'        => $validated['customer_name'],
+                'phone_number'         => $validated['phone_number'],
+                'address'              => $validated['address'] ?? null,
+                'service_id'           => $firstService->id,
+                'weight'               => $totalWeight,
+                'price_per_kg'         => $firstService->price_per_kg,
+                'total_price'          => $totalPrice,
+                'promo_used'           => $promoUsed,
+                'discount_amount'      => $discountAmount,
+                'status'               => 'Diproses',
+                'payment_status'       => $validated['payment_status'],
+                'notes'                => $validated['notes'] ?? null,
+                'estimated_completion' => now()->addDays(2),
+                'email'                => $validated['email'],
+            ]);
 
-        // Log initial status
-        TransactionStatus::create([
-            'transaction_id' => $transaction->id,
-            'status'         => 'Diproses',
-            'notes'          => 'Transaksi dibuat',
-            'changed_at'     => now(),
-        ]);
+            foreach ($serviceLines as $line) {
+                $transaction->laundryServices()->attach($line['service']->id, [
+                    'quantity'     => $line['quantity'],
+                    'price_per_kg' => $line['unit_price'],
+                    'subtotal'     => $line['subtotal'],
+                ]);
+            }
+
+            // Log initial status
+            TransactionStatus::create([
+                'transaction_id' => $transaction->id,
+                'status'         => 'Diproses',
+                'notes'          => 'Transaksi dibuat',
+                'changed_at'     => now(),
+            ]);
+
+            return $transaction;
+        });
 
         return redirect()
             ->route('admin.transactions.show', $transaction)

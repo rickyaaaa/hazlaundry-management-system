@@ -305,6 +305,27 @@
                 </div>
                 <svg style="margin-left:auto; stroke:#cbd5e1;" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
             </div>
+
+            <!-- Kritik & Saran -->
+            <div class="card-white" style="margin-top: 24px; padding: 24px;">
+                <div style="font-size: 16px; font-weight: 600; color: #003366; margin-bottom: 4px;">Kritik & Saran</div>
+                <p style="font-size: 13px; color: #64748b; margin: 0 0 16px 0; line-height: 1.5;">Masukan Anda membantu kami meningkatkan kualitas layanan.</p>
+
+                @if(session('feedback_success'))
+                <div style="background:#ecfdf5; border:1px solid #a7f3d0; color:#065f46; border-radius:8px; padding:12px 16px; font-size:13px; margin-bottom:16px;">
+                    {{ session('feedback_success') }}
+                </div>
+                @else
+                <form method="POST" action="{{ route('tracking.feedback.store', $transaction) }}">
+                    @csrf
+                    <textarea name="message" rows="4" required maxlength="1000" placeholder="Tulis kritik atau saran Anda di sini..." style="width:100%; border:1px solid #e2e8f0; border-radius:8px; padding:12px 14px; font-size:13px; font-family:'Inter',sans-serif; outline:none; resize:vertical; box-sizing:border-box;">{{ old('message') }}</textarea>
+                    @error('message')
+                        <span style="font-size:11px; color:#dc2626; display:block; margin-top:4px;">{{ $message }}</span>
+                    @enderror
+                    <button type="submit" style="width:100%; margin-top:12px; background:#003366; color:#fff; border:none; padding:12px; border-radius:8px; font-weight:600; font-size:13px; cursor:pointer;">Kirim Masukan</button>
+                </form>
+                @endif
+            </div>
         </div>
 
         @if(isset($promos) && $promos->isNotEmpty())

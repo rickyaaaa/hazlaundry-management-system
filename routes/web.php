@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\PromoController;
+use App\Http\Controllers\Admin\FeedbackController;
 use App\Http\Controllers\TrackingController;
 use App\Http\Controllers\ReceiptController;
 
@@ -28,6 +29,7 @@ Route::get('/tracking',         [TrackingController::class, 'index'])->name('tra
 Route::post('/tracking',        [TrackingController::class, 'track'])->name('tracking.track');
 Route::get('/pickup',           [TrackingController::class, 'showPickupForm'])->name('tracking.pickup.form');
 Route::post('/pickup',          [TrackingController::class, 'storePickup'])->name('tracking.pickup.store');
+Route::post('/tracking/{transaction}/feedback', [TrackingController::class, 'storeFeedback'])->name('tracking.feedback.store');
 Route::post('/api/check-promo', [PromoController::class, 'checkPromo'])->name('api.checkPromo');
 
 // ── Public: Pricing & Support ────────────────────────────────────────────────
@@ -78,6 +80,10 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
 
     // Users
     Route::resource('users', UserController::class);
+
+    // Kritik & Saran
+    Route::get('/feedback', [FeedbackController::class, 'index'])->name('feedback.index');
+    Route::delete('/feedback/{feedback}', [FeedbackController::class, 'destroy'])->name('feedback.destroy');
 
     // Reports
     Route::get('/reports',                    [ReportController::class, 'index'])->name('reports.index');

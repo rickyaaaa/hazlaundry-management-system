@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Transaction;
 use App\Models\LaundryService;
+use App\Models\Feedback;
 use App\Mail\StatusLaundryMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -139,5 +140,26 @@ class TrackingController extends Controller
 
         return redirect()->route('tracking.index')
                          ->with('success', "Permintaan antar jemput berhasil dibuat. Kode Tracking Anda: {$trackingCode}. Tim kami akan segera menghubungi Anda.");
+    }
+
+    /**
+     * Simpan kritik & saran pelanggan dari halaman hasil tracking.
+     */
+    public function storeFeedback(Request $request, Transaction $transaction)
+    {
+        $validated = $request->validate([
+            'name'         => 'nullable|string|max:255',
+            'phone_number' => 'nullable|string|max:20',
+            'message'      => 'required|string|max:1000',
+        ]);
+
+        Feedback::create([
+            'transaction_id' => $transaction->id,
+            'name'           => $request->input('name') ?: $transaction->customer_name,
+            'phone_number'   => $request->input('phone_number') ?: $transaction->phone_number,
+            'message'        => $validated['message'],
+        ]);
+
+        return back()->with('feedback_success', 'Terima kasih! Kritik & saran Anda sudah kami terima.');
     }
 }
